@@ -51,5 +51,10 @@ RUN rustup toolchain link stage1 ${RUSTC_DIR}/build/x86*/stage1 \
 COPY --chown=${USER_UID}:${USER_GID} ./rvt-patch-llvm ${USER_HOME}/rvt-patch-llvm
 RUN cargo install --root=${USER_HOME} --path=${USER_HOME}/rvt-patch-llvm
 
+# install protobuf/protoc
+RUN curl --location https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protoc-3.13.0-linux-x86_64.zip > /tmp/protobuf.zip \
+  && unzip /tmp/protobuf.zip -d /tmp/protobuf \
+  && export PATH=$PATH:/tmp/protobuf/bin
+
 # Create a bashrc file
 RUN echo "export PATH=\"${PATH}\"" >> ${USER_HOME}/.bashrc
