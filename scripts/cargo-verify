@@ -60,6 +60,28 @@ def read_metadata(crate, features):
   else:
     return json.loads(stdout)
 
+# Read build plan
+def read_build_plan(crate, flags):
+  rustflags = os.environ.get("RUSTFLAGS", "")
+
+  process = subprocess.Popen(['/usr/bin/env', 'cargo', 'build',
+                              '--build-plan', '-Z', 'unstable-options'
+                              ] + flags,
+                             cwd=crate,
+                             env = { "RUSTFLAGS": rustflags
+                                   , "PATH": os.environ["PATH"]
+                                   },
+                             stdout=subprocess.PIPE, 
+                             stderr=subprocess.PIPE)
+  stdout, stderr = process.communicate()
+  if process.returncode != 0:
+    print("Unable to read build plan")
+    print(stderr.decode("utf-8"))
+    print(stdout.decode("utf-8"))
+    sys.exit(1)
+  else:
+    return json.loads(stdout)
+
 # Find the name of the crate
 def get_packagename(crate):
   manifest = toml.load(f"{crate}/Cargo.toml")
