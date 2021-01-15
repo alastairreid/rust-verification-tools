@@ -18,6 +18,7 @@ use std::env;
 ///    `cargo verify . -- foo bar`
 fn main() {
     println!("{} args", env::args().len());
+    println!("PATH = {}", env::var("PATH").unwrap());
     verifier::assert!(env::args().len() >= 2);
     for a in env::args().skip(1) {
         println!("{}", a);
