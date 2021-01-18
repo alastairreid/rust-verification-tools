@@ -1,0 +1,6 @@
+[book]
+authors = ["Alastair Reid"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Case studies in specification with Rust"
