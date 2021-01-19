@@ -32,4 +32,3 @@ help typical developers to achieve their goals more effectively.
 More manual specification and verification approaches have their place but
 they require significant training to become proficient and they require larger
 changes in how software is developed.
-
