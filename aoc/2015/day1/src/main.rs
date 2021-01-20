@@ -1,6 +1,9 @@
+use std;
+
 fn main() {
-    let dirs = "";
-    println!("Santa {} = {}", dirs, santa(dirs));
+    for dirs in std::env::args() {
+        println!("Santa {} = {}", dirs, santa(&dirs))
+    }
 }
 
 // todo: first attempt was wrong: used a usize for result
