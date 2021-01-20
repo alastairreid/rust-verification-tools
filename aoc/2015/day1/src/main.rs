@@ -80,4 +80,26 @@ mod test {
             prop_assert_eq!(santa(x.as_str()), 0)
         }
     }
+
+    proptest! {
+        #[test]
+        fn filtered(x: String) {
+            let ups = isize::try_from(x.chars().filter(|c| *c == '(').count())?;
+            let downs = isize::try_from(x.chars().filter(|c| *c == ')').count())?;
+            prop_assert_eq!(santa(x.as_str()), ups - downs)
+        }
+    }
+
+    fn santa_spec(dirs: &str) -> isize {
+        let ups: isize = isize::try_from(dirs.chars().filter(|c| *c == '(').count()).unwrap();
+        let downs: isize = isize::try_from(dirs.chars().filter(|c| *c == ')').count()).unwrap();
+        ups - downs
+    }
+
+    proptest! {
+        #[test]
+        fn filtered2(x: String) {
+            prop_assert_eq!(santa(x.as_str()), santa_spec(x.as_str()))
+        }
+    }
 }
