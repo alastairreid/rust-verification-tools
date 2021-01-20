@@ -805,7 +805,7 @@ def main():
   parser.add_argument('arg', nargs="*", default=[], help='arguments to pass to program under test')
   parser.add_argument('--jobs', '-j', metavar='N', type=int, default=multiprocessing.cpu_count(),
                       help='Number of parallel jobs, defaults to # of CPUs')
-  parser.add_argument('--noposix', action='store_false', default=False, help='disable POSIX support')
+  parser.add_argument('--noposix', action='store_false', default=True, help='disable POSIX support')
   parser.add_argument('--klee_flags', nargs="*", default=[], help='extra verification flags')
   parser.add_argument('--replay', '-r', action='count', default=0,
                       help='replay to display concrete input values')
