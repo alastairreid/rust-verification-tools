@@ -2,7 +2,8 @@ use std;
 
 fn main() {
     for dirs in std::env::args() {
-        println!("Santa {} = {}", dirs, santa(&dirs))
+        println!("Santa {} = {}", dirs, santa(&dirs));
+        println!("Santa goes underground {} at step {}", dirs, underground_santa(&dirs))
     }
 }
 
@@ -19,6 +20,27 @@ fn santa(dirs: &str) -> isize {
         }
     }
     count
+}
+
+// part two of the puzzle
+fn underground_santa(dirs: &str) -> usize {
+    let mut count = 0;
+    for (i, c) in dirs.chars().enumerate() {
+        // todo: I don't like this repetition from previous solution much
+        // todo: should we consider a solution that answers both puzzles
+        // in a single pass?
+        if c == '(' {
+            count += 1;
+        } else if c == ')' {
+            count -= 1;
+        } else {
+        }
+        if count < 0 {
+            return i+1
+        }
+    }
+    return 0; // todo: is this the right way to indicate error?
+
 }
 
 mod test {
