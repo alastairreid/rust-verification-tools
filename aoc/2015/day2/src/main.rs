@@ -1,5 +1,26 @@
+use regex::Regex;
+use std::io;
+use std::io::prelude::*;
+
 fn main() {
-    println!("Hello, world!");
+    let mut total = 0;
+    let re = Regex::new(r"(\d+)x(\d+)x(\d+)").unwrap();
+    for line in io::stdin().lock().lines() {
+        let line = line.unwrap();
+        let cap = re.captures(line.as_str()).unwrap();
+        let caps: Vec<Result<u32, std::num::ParseIntError>> = cap.iter().map(|i| i.unwrap().as_str().parse::<u32>()).collect();
+        match caps[1..] {
+            [Ok(x), Ok(y), Ok(z)] => {
+                let w = wrapping(x, y, z);
+                total += w;
+                println!("Wrapping for {}x{}x{} = {}", x, y, z, w);
+            },
+            _ => {
+                panic!("Malformed input {:?}", cap);
+            }
+        }
+    }
+    println!("Total wrapping paper required = {}", total)
 }
 
 fn wrapping(x: u32, y: u32, z: u32) -> u32 {
