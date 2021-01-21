@@ -49,3 +49,36 @@ Specification thoughts for part 2
 - Some trivial but annoying out-by-one errors found because of the way that the
   problem is defined.
 
+## [Day 2](https://adventofcode.com/2015/day/2)
+
+Part 1: Calculate area of wrapping paper needed for a box.
+
+Part 2: Calculate length of ribbon needed for a box.
+
+Specification thoughts for part 1
+
+- The problem statement includes some examples - it is worth checking all of
+  those.
+- Neither the area nor the length is just the mathematical definition so some
+  standard tests don't quite work because standard mathematical laws don't hold.
+- There doesn't seem to be any reasonable way to write a specification that is
+  not just a repeat of the implementation so we are forced to rely on
+  writing properties that do not completely characterize the function.
+
+  - Two zero length sides require zero paper and zero ribbon.
+  - Doubling the length of all the sides quadruples the paper needed.
+    (The ribbon calculation does not allow an easy check like that.)
+  - The order in which the sides are specified does not affect the result.
+  - Larger boxes need more paper and more ribbon.
+
+- Do we think that the properties we wrote would catch all likely bugs?
+
+  - Implementations that always return zero would pass the property checks
+    (but not the examples).
+  - Implementations that use `+` for `*` or `*` for `+` would probably
+    not pass the zero-length check and would definitely be caught by
+    the examples.
+  - Implementations with typos that confuse x, y and z or cut-and-paste
+    repetitions would likely be caught by the reordering rules.
+
+  Overall, it's probably not too bad.
