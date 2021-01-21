@@ -3,24 +3,34 @@ use std::io;
 use std::io::prelude::*;
 
 fn main() {
-    let mut total = 0;
+    let mut total_wrapping = 0;
+    let mut total_ribbon = 0;
     let re = Regex::new(r"(\d+)x(\d+)x(\d+)").unwrap();
     for line in io::stdin().lock().lines() {
         let line = line.unwrap();
         let cap = re.captures(line.as_str()).unwrap();
-        let caps: Vec<Result<u32, std::num::ParseIntError>> = cap.iter().map(|i| i.unwrap().as_str().parse::<u32>()).collect();
+        let caps: Vec<Result<u32, std::num::ParseIntError>> = cap
+            .iter()
+            .map(|i| i.unwrap().as_str().parse::<u32>())
+            .collect();
         match caps[1..] {
             [Ok(x), Ok(y), Ok(z)] => {
                 let w = wrapping(x, y, z);
-                total += w;
-                println!("Wrapping for {}x{}x{} = {}", x, y, z, w);
-            },
+                let r = ribbon(x, y, z);
+                total_wrapping += w;
+                total_ribbon += r;
+                println!(
+                    "For {}x{}x{} you need {} wrapping and {} ribbon",
+                    x, y, z, w, r
+                );
+            }
             _ => {
                 panic!("Malformed input {:?}", cap);
             }
         }
     }
-    println!("Total wrapping paper required = {}", total)
+    println!("Total wrapping paper required = {}", total_wrapping);
+    println!("Total ribbon required = {}", total_ribbon);
 }
 
 fn wrapping(x: u32, y: u32, z: u32) -> u32 {
@@ -91,4 +101,33 @@ mod test_part1 {
     //         prop_assert!(wrapping(x1, y1, z1) <= wrapping(x2, y2, z2))
     //     }
     // }
+}
+
+fn ribbon(x: u32, y: u32, z: u32) -> u32 {
+    let volume = x * y * z;
+    let half_perimeters = [x + y, x + z, y + z];
+    let smallest = *half_perimeters.iter().min().unwrap();
+    let perimeter = 2 * smallest;
+    perimeter + volume
+}
+
+mod test_part2 {
+    #[cfg(not(verify))]
+    use proptest::prelude::*;
+    #[cfg(verify)]
+    use propverify::prelude::*;
+
+    use super::ribbon;
+
+    #[test]
+    /// Example from the problem statement
+    fn example_1() {
+        assert_eq!(ribbon(2, 3, 4), 34)
+    }
+
+    #[test]
+    /// Example from the problem statement
+    fn example_2() {
+        assert_eq!(ribbon(1, 1, 10), 14)
+    }
 }
