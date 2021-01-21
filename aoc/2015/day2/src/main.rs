@@ -48,6 +48,7 @@ mod test_part1 {
     #[cfg(verify)]
     use propverify::prelude::*;
 
+    use std::cmp::{min, max};
     use super::wrapping;
 
     #[test]
@@ -64,6 +65,7 @@ mod test_part1 {
 
     proptest! {
         #[test]
+        /// Parcels of zero size on two sides need no wrapping paper
         fn zero(z: u32) {
             prop_assert_eq!(wrapping(z, 0, 0), 0)
         }
@@ -91,16 +93,23 @@ mod test_part1 {
         }
     }
 
-    // Can't express in proptest
-    // proptest!{
-    //     #[test]
-    //     // Note use of restricted range to avoid arithmetic overflow
-    //     fn bigger(x1 in 0..1000u32, y1 in 0..1000u32, z1 in 0..1000u32,
-    //               x2 in x1..1000u32, y2 in y1..1000u32, z2 in z1..1000u32,
-    //               ) {
-    //         prop_assert!(wrapping(x1, y1, z1) <= wrapping(x2, y2, z2))
-    //     }
-    // }
+    proptest!{
+        #[test]
+        /// Larger boxes need more wrapping paper
+        ///
+        /// Note use of restricted range to avoid arithmetic overflow
+        fn bigger(x1 in 0..1000u32, y1 in 0..1000u32, z1 in 0..1000u32,
+                  x2 in 0..1000u32, y2 in 0..1000u32, z2 in 0..1000u32,
+                  ) {
+            fn min_max(a: u32, b: u32) -> (u32, u32) {
+                (min(a, b), max(a, b))
+            }
+            let (x1, x2) = min_max(x1, x2);
+            let (y1, y2) = min_max(y1, y2);
+            let (z1, z2) = min_max(z1, z2);
+            prop_assert!(wrapping(x1, y1, z1) <= wrapping(x2, y2, z2))
+        }
+    }
 }
 
 fn ribbon(x: u32, y: u32, z: u32) -> u32 {
@@ -117,6 +126,7 @@ mod test_part2 {
     #[cfg(verify)]
     use propverify::prelude::*;
 
+    use std::cmp::{min, max};
     use super::ribbon;
 
     #[test]
@@ -129,5 +139,45 @@ mod test_part2 {
     /// Example from the problem statement
     fn example_2() {
         assert_eq!(ribbon(1, 1, 10), 14)
+    }
+
+    proptest! {
+        #[test]
+        /// Parcels of zero size on two sides need no ribbon
+        fn zero(z: u32) {
+            prop_assert_eq!(ribbon(z, 0, 0), 0)
+        }
+    }
+
+    proptest! {
+        #[test]
+        /// The order of the different sides does not affect the result
+        ///
+        /// Note use of restricted range to avoid arithmetic overflow
+        fn reorder(x in 0..1000u32, y in 0..1000u32, z in 0..1000u32) {
+            prop_assert_eq!(ribbon(x, y, z), ribbon(x, z, y));
+            prop_assert_eq!(ribbon(x, y, z), ribbon(y, x, z));
+            prop_assert_eq!(ribbon(x, y, z), ribbon(y, z, x));
+            prop_assert_eq!(ribbon(x, y, z), ribbon(z, x, y));
+            prop_assert_eq!(ribbon(x, y, z), ribbon(z, y, x));
+        }
+    }
+
+    proptest!{
+        #[test]
+        /// Larger boxes need more wrapping paper
+        ///
+        /// Note use of restricted range to avoid arithmetic overflow
+        fn bigger(x1 in 0..1000u32, y1 in 0..1000u32, z1 in 0..1000u32,
+                  x2 in 0..1000u32, y2 in 0..1000u32, z2 in 0..1000u32,
+                  ) {
+            fn min_max(a: u32, b: u32) -> (u32, u32) {
+                (min(a, b), max(a, b))
+            }
+            let (x1, x2) = min_max(x1, x2);
+            let (y1, y2) = min_max(y1, y2);
+            let (z1, z2) = min_max(z1, z2);
+            prop_assert!(ribbon(x1, y1, z1) <= ribbon(x2, y2, z2))
+        }
     }
 }
