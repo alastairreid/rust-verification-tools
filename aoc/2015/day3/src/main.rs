@@ -1,11 +1,11 @@
 use itertools::Itertools;
-use std::io::{self, Read};
+use std::fs;
+use std::io;
 
 
 fn main() -> io::Result<()> {
-    let mut buffer = String::new();
-    io::stdin().read_to_string(&mut buffer)?;
-    println!("Santa visited {} unique houses", num_visited(buffer.as_str()));
+    let directions = fs::read_to_string("input1.txt")?;
+    println!("Santa visited {} unique houses", num_visited(directions.as_str()));
     Ok(())
 }
 
@@ -30,6 +30,8 @@ fn num_visited(dirs: &str) -> usize {
         .chain(
             dirs
             .chars()
+            // not necessary
+            // .filter(|c| "<>^v".contains(*c))
             .scan(start, |pos, d| {
                 let (dx, dy) = delta(d);
                 *pos = (pos.0 + dx, pos.1 + dy);
