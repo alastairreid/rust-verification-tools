@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io;
 use std::io::prelude::*;
 
@@ -86,7 +87,18 @@ mod rule_tests {
 ///
 /// (I think this means adjacent letters)
 fn rule4(x: &str) -> bool {
-    true
+    let mut repeats = HashMap::new();
+    let mut y = x.chars();
+    y.next();
+    for (i, (c, d)) in x.chars().zip(y).enumerate() {
+        if let Some(j) = repeats.get(&(c,d)) {
+            if i-j >= 2 {
+                return true
+            }
+        }
+        repeats.insert((c, d), i);
+    }
+    false
 }
 
 
@@ -101,6 +113,11 @@ fn rule5(x: &str) -> bool {
         .position(|(c, d)| c == d)
         .is_some()
 }
+
+fn is_nice2(x: &str) -> bool {
+    rule4(x) & rule5(x)
+}
+
 
 mod rule_tests2 {
     use super::*;
@@ -118,5 +135,13 @@ mod rule_tests2 {
         assert!(rule5("abcdefeghi"));
         assert!(rule5("aaa"));
         assert!(!rule5("abba"));
+    }
+
+    #[test]
+    fn test_nice() {
+        assert!(is_nice2("qjhvhtzxzqqjkmpb"));
+        assert!(is_nice2("xxyxx"));
+        assert!(!is_nice2("uurcxstgmygtbstg"));
+        assert!(!is_nice2("ieodomkazucvgmuy"));
     }
 }
