@@ -82,3 +82,42 @@ Specification thoughts for part 1
     repetitions would likely be caught by the reordering rules.
 
   Overall, it's probably not too bad.
+
+## Misc thoughts
+
+Some patterns that recur (mostly coming out in Shaked's versions):
+
+- The Galois connection or projection/embedding-pair pattern
+  of a pair of functions `f` and `g` such that
+
+      f(g(x)) == x
+      g(f(g(x))) == g(x)   // a simple consequence of first rule
+
+  and, perhaps an ordering `<=` or a natural transformation `n`
+  such that
+
+      g(f(x)) <= x
+
+  or
+
+      g(f(x)) == n(x)
+
+  where `n` normalizes values by taking them to the smallest/simplest
+  value.
+
+      forall x, y. y <= x ==> n(x) <= y
+
+  This full generality is probably overkill for tutorials - but we
+  should go as far as we can in illustrating it with examples such as
+
+  - parse / print pairs
+  - abstraction / representation pairs
+  - conversion between specialized types like application specific
+    structs and general purpose types like tuples.
+
+- Writing a deterministic spec and an abstraction function and
+  then coding up the usual commuting diagrams.
+
+      F(abs(x)) == abs(f(x))
+
+
