@@ -47,6 +47,10 @@ fn is_nice(x: &str) -> bool {
 }
 
 mod rule_tests {
+    #[cfg(not(verify))]
+    use proptest::prelude::*;
+    #[cfg(verify)]
+    use propverify::prelude::*;
     use super::*;
 
     #[test]
@@ -55,6 +59,19 @@ mod rule_tests {
         assert!(rule1("xazegov"));
         assert!(rule1("aeiouaeiouaeiou"));
     }
+
+    // proptest! {
+    //     #[test]
+    //     fn prop_rule1(x: &str, c: char) {
+    //         if rule1(x) {
+    //             prop_assert!(rule1([x, c].concat()))
+    //         } else {
+    //             if rule1([x, c].concat()) {
+    //                 prop_assert!("aeiou".contains(|d| c == d))
+    //             }
+    //         }
+    //     }
+    // }
 
     #[test]
     fn test_rule2() {
