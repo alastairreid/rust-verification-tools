@@ -120,4 +120,21 @@ Some patterns that recur (mostly coming out in Shaked's versions):
 
       F(abs(x)) == abs(f(x))
 
+- Writing specs is often hard and has limited benefit because the spec
+  looks so much like the implementation.
+  Alternatives are
+
+  - Using the implementation as a test of itself.
+    For example, where the implementation has a fast path and a slow path
+    and the fast path should behave the same as the slow path.
+
+  - Checking symmetries like `f(x, y)` == `f(y, x)`.
+    (Which also has some of the flavour of using the implementation
+    to test itself.)
+
+  - Checking for panics by trying to constrain the inputs as little as
+    possible and then just calling the function - with no particular
+    assertion.
+
+
 
