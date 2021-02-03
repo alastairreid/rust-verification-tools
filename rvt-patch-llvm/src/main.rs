@@ -12,6 +12,7 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
+use inkwell::builder::Builder;
 use inkwell::context::Context;
 use inkwell::memory_buffer::MemoryBuffer;
 use inkwell::module::Linkage;
@@ -42,6 +43,10 @@ struct Opt {
         default_value = "out"
     )]
     output: PathBuf,
+
+    /// Eliminate feature tests
+    #[structopt(short, long)]
+    features: bool,
 
     /// Call initializers from main
     #[structopt(short, long)]
@@ -78,6 +83,23 @@ fn main() {
     let mut module = context
         .create_module_from_ir(memory_buffer)
         .expect("ERROR: failed to create module.");
+
+    if opt.features {
+        info!("Patching feature functions");
+        stub_functions(
+            &context,
+            &module,
+            &[
+                "std::std_detect::detect::arch::__is_feature_detected::avx2",
+                "std::std_detect::detect::arch::__is_feature_detected::ssse3",
+                "std::std_detect::detect::check_for",
+            ],
+            |builder| {
+                builder.build_return(Some(&context.bool_type().const_int(0, false)));
+                ()
+            },
+        );
+    }
 
     if opt.initializers {
         handle_initializers(&context, &mut module);
@@ -259,6 +281,70 @@ fn insert_call_at_head<'a>(
     let builder = context.create_builder();
     builder.position_before(&first_instruction);
     builder.build_call(f, &args, "");
+}
+
+////////////////////////////////////////////////////////////////
+// Function transformation functions
+////////////////////////////////////////////////////////////////
+
+/// Apply Rust mangling rule to a function name like 'foo::bar'.
+/// Does not insert a unique hash at the end or the final 'E' character.
+fn rust_mangle(n: &str) -> String {
+    // todo: I believe that this can be implemented by an elegant chain of
+    // iterators - but I am not smart enough to figure out the ownership, etc.
+    // issues that rustc reports so I went with the following code instead.
+    let mut rs = vec!["_ZN".to_string()];
+    for x in n.split("::") {
+        rs.push(format!("{}{}", x.len(), x));
+    }
+    rs.concat()
+}
+
+/// Find a function whose name matches a Rust-mangled prefix
+fn find_mangled_function<'a>(module: &Module<'a>, prefix: &str) -> Option<FunctionValue<'a>> {
+    let prefix = rust_mangle(prefix);
+    let mut of = module.get_first_function();
+    while let Some(f) = of {
+        if f.get_name().to_bytes().starts_with(prefix.as_bytes()) {
+            return Some(f);
+        }
+        of = f.get_next_function()
+    }
+    return None;
+}
+
+/// Delete the body of a function
+fn delete_body<'ctx>(f: &FunctionValue<'ctx>) {
+    let mut ob = f.get_first_basic_block();
+    while let Some(b) = ob {
+        ob = b.get_next_basic_block();
+        unsafe {
+            b.delete().expect("delete basic block");
+        };
+    }
+}
+
+/// Stub out a list of functions by deleting the existing
+/// body of each function and using mk_stub to construct a new body.
+///
+/// Functions are identified specified by names like "foo::bar"
+/// and exclude the uniquifying hash code at the end.
+fn stub_functions<F>(context: &Context, module: &Module, functions: &[&str], mk_stub: F)
+where
+    F: Fn(&Builder),
+{
+    for f in functions {
+        if let Some(fun) = find_mangled_function(&module, f) {
+            info!("Stubbing out function function {}", f);
+            delete_body(&fun);
+            let basic_block = context.append_basic_block(fun, "entry");
+            let builder = context.create_builder();
+            builder.position_at_end(basic_block);
+            mk_stub(&builder)
+        } else {
+            info!("Did not find function to stub {}", f)
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////
