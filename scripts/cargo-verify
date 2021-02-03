@@ -390,7 +390,7 @@ def klee_run(bcfile, name, entry, crate, kleeout, stats, posix, klee_flags, prog
     # libs.append('--libcxx')
   process = subprocess.Popen(['klee',
                               '--entry-point='+entry,
-                              # '--exit-on-error',
+                              '--exit-on-error',
                               '--silent-klee-assume',
                               f'--output-dir={kleeout}',
 
