@@ -85,6 +85,79 @@ fn t5() {
     verifier::assert_ne!(a, a+1);
 }
 
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn bytes() {
+    let a = verifier::verifier_nondet_bytes(8);
+    for i in a.iter() {
+        verifier::assume(*i == 42);
+    }
+    if verifier::is_replay() {
+        println!("{:?}", a);
+    }
+    verifier::assert_eq!(a.len(), 8);
+    verifier::assert_ne!(a[2], 0u8);
+    verifier::assert_eq!(a[3], 42u8);
+}
+
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn cstring() {
+    let a = verifier::verifier_nondet_cstring(8);
+
+    if verifier::is_replay() {
+        println!("{:?}", a);
+    }
+
+    // force string to be plain ASCII - to keep things simple
+    for i in a.as_bytes().iter() {
+        verifier::assume(i.is_ascii_alphabetic());
+    }
+
+    for i in a.as_bytes().iter() {
+        verifier::assert!(i.is_ascii());
+        // this assertion would fail
+        // verifier::assert!(i.is_ascii_digit());
+    }
+}
+
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn string_ok() {
+    let a = verifier::verifier_nondet_ascii_string(6);
+
+    if verifier::is_replay() {
+        println!("{:?}", a);
+    }
+
+    // force string to be a legal int
+    for i in a.as_bytes().into_iter() {
+        verifier::assume(('0'..='3').contains(&(*i as char)))
+    }
+
+    let i: u32 = a.parse().unwrap();
+    verifier::assert!(i <= 333_333);
+}
+
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn string_should_fail() {
+    verifier::expect(Some("assertion failed"));
+    let a = verifier::verifier_nondet_ascii_string(6);
+
+    if verifier::is_replay() {
+        println!("{:?}", a);
+    }
+
+    // force string to be a legal int
+    for i in a.as_bytes().into_iter() {
+        verifier::assume(('0'..='3').contains(&(*i as char)))
+    }
+
+    let i: u32 = a.parse().unwrap();
+    verifier::assert!(i <= 222_222);
+}
+
 ////////////////////////////////////////////////////////////////
 // End
 ////////////////////////////////////////////////////////////////
