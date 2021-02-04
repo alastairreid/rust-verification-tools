@@ -5,6 +5,7 @@
 use crate as verifier;
 
 use crate::assert;
+use regex::Regex;
 
 #[cfg_attr(not(feature = "verifier-crux"), test)]
 #[cfg_attr(feature = "verifier-crux", crux_test)]
@@ -156,6 +157,37 @@ fn string_should_fail() {
 
     let i: u32 = a.parse().unwrap();
     verifier::assert!(i <= 222_222);
+}
+
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn regex_ok() {
+    let a = verifier::verifier_nondet_ascii_string(2);
+
+    if verifier::is_replay() {
+        println!("Value a = {:?}", a);
+    }
+
+    verifier::assume(Regex::new(r"[0-1]{2}").unwrap().is_match(&a));
+
+    let i: u32 = a.parse().unwrap();
+    verifier::assert!(i <= 11);
+}
+
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn regex_should_fail() {
+    verifier::expect(Some("assertion failed"));
+    let a = verifier::verifier_nondet_ascii_string(2);
+
+    if verifier::is_replay() {
+        println!("Value a = {:?}", a);
+    }
+
+    verifier::assume(Regex::new(r"[0-1]{2}").unwrap().is_match(&a));
+
+    let i: u32 = a.parse().unwrap();
+    verifier::assert!(i < 11);
 }
 
 ////////////////////////////////////////////////////////////////
