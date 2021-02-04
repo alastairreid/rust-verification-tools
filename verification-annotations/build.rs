@@ -8,8 +8,18 @@
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    #[cfg(feature = "verifier-klee")]
+    klee();
     #[cfg(feature = "verifier-seahorn")]
     seahorn();
+}
+
+#[cfg(feature = "verifier-klee")]
+fn klee() {
+    println!("cargo:rerun-if-changed=lib/klee.c");
+    cc::Build::new()
+        .file("lib/klee.c")
+        .compile("klee");
 }
 
 #[cfg(feature = "verifier-seahorn")]

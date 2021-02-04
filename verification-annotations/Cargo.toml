@@ -13,7 +13,7 @@ license = "MIT OR Apache-2.0"
 
 [features]
 verifier-crux = []
-verifier-klee = []
+verifier-klee = [ "cc" ]
 verifier-seahorn = [ "cc" ]
 
 [build-dependencies]
