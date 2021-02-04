@@ -276,7 +276,11 @@ def compile(label, crate, runtests, verbose, rustflags, features, target):
   bcfiles = glob.glob(pattern)
 
   pattern = f"{targetdir}/{target}/debug/build/*/out/*.o"
-  c_files = glob.glob(pattern)
+  c_files1 = glob.glob(pattern)
+
+  pattern = f"{targetdir}/{target}/debug/build/*/out/*/*.o"
+  c_files2 = glob.glob(pattern)
+  c_files = c_files1 + c_files2
 
   # build_plan = read_build_plan(crate, flags)
   # print(json.dumps(build_plan, indent=4, sort_keys=True))
@@ -659,6 +663,21 @@ def verifier_run(bcfile, name, entry, crate, runtests, features, posix, flags, p
 # and run one of the LLVM verifier backends on the result.
 def verify(label, crate, runtests, testfilter, posix, verifier_flags, program_args, verbose, replay, features, target, backend, jobs):
 
+  # If using the --tests flag, generate a list of tests
+  if runtests:
+    # get a list of the tests
+    if verbose > 2: print(f"  Getting list of tests in {label}")
+    tests = list_tests(crate, verbose, features)
+    if testfilter:
+      tests = [ t for t in tests if any([ f in t for f in testfilter ]) ]
+    if not tests:
+      print("No tests found")
+      return status_unknown
+    if verbose > 0: print(f"  Checking {' '.join(tests)}")
+  else:
+    tests = [("main", "main")]
+
+
   # Compile and link the patched file using LTO to generate the entire
   # application in a single LLVM file
   if verbose > 1: print(f"  Compiling {label}")
@@ -713,22 +732,9 @@ def verify(label, crate, runtests, testfilter, posix, verifier_flags, program_ar
   else:
     bcfile = rust_file
 
-  # If using the --tests flag, generate a list of tests and their mangled names
-  if runtests:
-    # get a list of the tests
-    if verbose > 2: print(f"  Getting list of tests in {label}")
-    tests = list_tests(crate, verbose, features)
-    if testfilter:
-      tests = [ t for t in tests if any([ f in t for f in testfilter ]) ]
-    if not tests:
-      print("No tests found")
-      return status_unknown
-    if verbose > 0: print(f"  Checking {' '.join(tests)}")
-    # then look up their mangled names in the bcfile
+  if runtests: # lookup the mangled names of any tests in the bcfile
     tests = mangle_functions(rust_file, [ t.split('::') for t in tests ], verbose)
     if verbose > 3: print(f"  Mangled: {tests}")
-  else:
-    tests = [("main", "main")]
 
   new_bcfile = f"patched.bc"
   if verbose > 2: print(f"  Patching LLVM file {bcfile} to produce {new_bcfile}")
