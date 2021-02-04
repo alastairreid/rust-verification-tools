@@ -564,7 +564,7 @@ def klee_importance(l, expect):
 
 
 # Replay a KLEE "ktest" file
-def replay_klee(ktest, name, crate, program_args, features, runtests):
+def replay_klee(ktest, name, crate, program_args, features, runtests, verbosity):
   cmd = []
   if runtests:
     cmd.extend(["cargo", "test"])
@@ -590,6 +590,9 @@ def replay_klee(ktest, name, crate, program_args, features, runtests):
                              cwd=crate,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
+  if verbosity > 3:
+    print(f"Replaying test {ktest} with command " + ' '.join(process.args))
+    print(f"  and RUSTFLAGS={rustflags}")
   stdout, stderr = process.communicate()
   if process.returncode != 0:
     for l in stderr.splitlines(): print("      " + l.decode("utf-8"))
@@ -636,7 +639,7 @@ def klee_verify(bcfile, name, test, crate, runtests, features, posix, flags, pro
 
     for ktest in ktests:
       print(f"    Test input {ktest}")
-      replay_klee(ktest, name, crate, program_args, features, runtests)
+      replay_klee(ktest, name, crate, program_args, features, runtests, verbose)
   return status
 
 
