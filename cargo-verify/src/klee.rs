@@ -315,10 +315,10 @@ fn replay_klee(opt: &Opt, name: &str, ktest: &Path) -> CVResult<()> {
 
     // Note that we do not treat this as an error, because
     // the interesting case for replay is when KLEE had found an error.
-    let (stdout, stderr, _success) = cmd.output_info_ignore_exit()?;
+    let (stdout, _stderr, _success) = cmd.output_info_ignore_exit()?;
 
-    for line in stdout.lines().chain(stderr.lines()) {
-        println!("{}", line);
+    for line in stdout.lines() {
+        println!("      {}", line);
     }
 
     Ok(())
