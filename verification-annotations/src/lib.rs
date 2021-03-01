@@ -6,6 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#[macro_use]
+extern crate lazy_static;
+use std::collections::HashSet;
+use std::sync::Mutex;
+
 // Traits for creating symbolic/abstract values
 mod traits;
 pub use crate::traits::*;
@@ -40,6 +45,24 @@ macro_rules! verifier_assume {
 #[macro_export]
 macro_rules! verifier_unreachable {
     () => { $crate::assert!(false, "unreachable assertion was reached"); };
+}
+
+pub fn verifier_warning(message: &str) {
+    eprintln!("VERIFIER_WARNING: {}", message)
+}
+
+lazy_static! {
+    /// Hash table of previously reported warnings.
+    /// This is used to avoid reporting the same warning more than once.
+    static ref REPORTED: Mutex<HashSet<&'static str>> = Mutex::new(HashSet::new());
+}
+
+pub fn verifier_warning_once(message: &'static str) {
+    let mut seen = REPORTED.lock().unwrap();
+    if !seen.contains(message) {
+        eprintln!("VERIFIER_WARNING_ONCE: {}", message);
+        seen.insert(message);
+    }
 }
 
 // At the moment, the cargo-verify script does not support
