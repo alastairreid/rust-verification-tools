@@ -14,10 +14,10 @@ license = "MIT OR Apache-2.0"
 [features]
 verifier-crux = []
 verifier-klee = []
-verifier-seahorn = [ "cc" ]
+verifier-seahorn = []
 
 [dependencies]
 lazy_static = "1.4"
 
 [build-dependencies]
-cc = { optional = true, version = "1.0" }
+cc = { version = "1.0" }

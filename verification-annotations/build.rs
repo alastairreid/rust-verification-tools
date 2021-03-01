@@ -8,8 +8,16 @@
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    common();
     #[cfg(feature = "verifier-seahorn")]
     seahorn();
+}
+
+fn common() {
+    println!("cargo:rerun-if-changed=lib/common.c");
+    cc::Build::new()
+        .file("lib/common.c")
+        .compile("common");
 }
 
 #[cfg(feature = "verifier-seahorn")]

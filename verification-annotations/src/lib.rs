@@ -65,6 +65,14 @@ pub fn verifier_warning_once(message: &'static str) {
     }
 }
 
+/// Opaque function that can be used to prevent a value or path from being optimized
+/// away by the Rust compiler.
+pub fn verifier_use_u32(x: u32) {
+    #[link(name = "common")]
+    extern "C" { fn verification_use_u32(x: u32); }
+    unsafe { verification_use_u32(x); }
+}
+
 // At the moment, the cargo-verify script does not support
 // use of a separate test directory so, for now, we put
 // the tests here.
