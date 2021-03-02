@@ -26,16 +26,14 @@ fn main() {
     //     println!("Choice {}", c);
     // }
 
-    // let a = verifier::random_sample_u32(3, 6, a);
-    // println!("sampled a = {}", a);
-
     let mut a = a;
     if false {
         verifier::coherent! {
             a = verifier::sample_u32(16, a);
         };
     } else {
-        a = verifier::sample_u32(16, a);
+        // a = verifier::sample_u32(16, a);
+        a = verifier::random_sample_u32(6, a);
     }
 
     println!("sampled a = {}", a);

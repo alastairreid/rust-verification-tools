@@ -234,23 +234,39 @@ pub fn sample_u32(samples: usize, x: u32) -> u32 {
     get_value_u32(x)
 }
 
+fn bit(i: u32, x: u32) -> u32 {
+    (x >> i) & 1
+}
+
+fn hash0(x: u32) -> u32 {
+    let x0 = bit(3, x) ^ bit(5, x) ^ bit(6, x);
+    let x1 = bit(1, x) ^ bit(2, x) ^ bit(4, x);
+    let x2 = bit(0, x) ^ bit(4, x) ^ bit(6, x);
+    let x3 = bit(2, x) ^ bit(7, x) ^ bit(8, x);
+    let x4 = bit(1, x) ^ bit(3, x) ^ bit(9, x);
+    x0 | (x1 << 1) | (x2 << 2) | (x3 << 3) | (x4 << 4)
+}
+
 // todo: this should be replaced with a universal hash function
 // (https://en.wikipedia.org/wiki/Universal_hashing)
-fn hash(x: u32) -> u32 {
+fn hash1(x: u32) -> u32 {
     u32::wrapping_add(u32::wrapping_mul(x, 1664525), 1013904223)
 }
 
-// In theory, this should give more random sampling than
-// `sample_u32` but, in practice, KLEE's solver very, very
-// strongly prefers to find the smallest values so
-// all this does is randomize the order in which values are generated.
+// The standard sampling technique (used in `sample_u32`) produces
+// tightly clustered values.
+// This is unfortunate because sampling is used to switch from
+// verification to testing and, for testing, we want to maximize
+// diversity.
 //
-// If we want actually random values, then maybe we need
-// to generate a series of random values that we want the bottom
-// N bits of the hash function to evaluate to?
+// This variant uses ideas from uniform random sampling with SAT/SMT to
+// generate more widely distributed solutions.
+// This relies on using random hash functions from a family of
+// uniform hash functions.
+// At the moment, the hash functions used are neither random nor uniform.
 pub fn random_sample_u32(log_samples: usize, x: u32) -> u32 {
     let samples = 1 << log_samples;
-    let h = hash(x) & (samples - 1);
+    let h = hash0(x) & (samples - 1);
     for i in 0..samples {
         if i == h {
             let s = get_value_u32(x);
