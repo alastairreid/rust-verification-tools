@@ -21,8 +21,13 @@ cargo build --features=verifier-klee
 rm -rf kleeout
 klee ${KLEE_FLAGS} --libc=klee --silent-klee-assume --output-dir=kleeout --warnings-only-to-file target/debug/deps/try_klee*.bc
 
-# view input value for first path
-ktest-tool kleeout/test000001.ktest
+for i in kleeout/test*.ktest
+do
+  echo "Showing test file $i"
 
-# replay input values
-KTEST_FILE=kleeout/test000001.ktest cargo run --features=verifier-klee
+  # view input value for first path
+  # ktest-tool $i | grep ' int '
+
+  # replay input values
+  KTEST_FILE=$i cargo run --features=verifier-klee --quiet
+done

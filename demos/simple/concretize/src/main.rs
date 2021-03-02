@@ -14,10 +14,10 @@ fn main() {
     verifier::assume(1 <= b && b <= 1000);
 
     if verifier::is_replay() {
-        eprintln!("Test values: a = {}, b = {}", a, b);
+        eprintln!("  Test values: a = {}, b = {}", a, b);
     }
 
-    verifier::case_split(a < 200);
+    verifier::case_split(a < 500);
     verifier::case_split(b < 200);
 
     // verifier::coherent! { verifier::case_split(b < 200); }
@@ -27,17 +27,20 @@ fn main() {
     // }
 
     let mut a = a;
+    // This samples the legal values of a but does not check all
+    // possible values so important corner cases can be missed
     if false {
-        verifier::coherent! {
-            a = verifier::sample_u32(16, a);
-        };
-    } else {
-        // a = verifier::sample_u32(16, a);
-        a = verifier::random_sample_u32(6, a);
+        if false {
+            verifier::coherent! {
+                a = verifier::random_sample_u32(6, a);
+            };
+        } else {
+            // a = verifier::sample_u32(16, a);
+            a = verifier::random_sample_u32(5, a);
+        }
+        // println!("  sampled a = {}", a);
     }
 
-    println!("sampled a = {}", a);
-
     let r = a*b;
-    verifier::assert!(1 <= r && r <= 1000000);
+    verifier::assert!(1 <= r && r < 1000000);
 }

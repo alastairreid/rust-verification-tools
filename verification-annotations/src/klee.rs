@@ -197,7 +197,8 @@ pub fn report_error(message: &str) -> ! {
 pub fn case_split(x: bool) {
     if x {
         // dummy call to prevent compiler from deleting this call
-        // crate::verifier_use_u32(0)
+        // this will generate an error message that you can ignore
+        crate::verifier_use_u32(0)
     }
 }
 
@@ -238,6 +239,7 @@ fn bit(i: u32, x: u32) -> u32 {
     (x >> i) & 1
 }
 
+#[allow(dead_code)]
 fn hash0(x: u32) -> u32 {
     let x0 = bit(3, x) ^ bit(5, x) ^ bit(6, x);
     let x1 = bit(1, x) ^ bit(2, x) ^ bit(4, x);
@@ -249,6 +251,7 @@ fn hash0(x: u32) -> u32 {
 
 // todo: this should be replaced with a universal hash function
 // (https://en.wikipedia.org/wiki/Universal_hashing)
+#[allow(dead_code)]
 fn hash1(x: u32) -> u32 {
     u32::wrapping_add(u32::wrapping_mul(x, 1664525), 1013904223)
 }
