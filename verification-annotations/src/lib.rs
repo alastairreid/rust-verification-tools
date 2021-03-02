@@ -6,6 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#![feature(cstring_from_vec_with_nul)]
+
 #[macro_use]
 extern crate lazy_static;
 use std::collections::HashSet;

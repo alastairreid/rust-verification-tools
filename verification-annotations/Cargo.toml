@@ -16,8 +16,9 @@ verifier-crux = []
 verifier-klee = []
 verifier-seahorn = []
 
-[dependencies]
-lazy_static = "1.4"
-
 [build-dependencies]
 cc = { version = "1.0" }
+
+[dependencies]
+lazy_static = "1.4"
+regex = "1.4"
