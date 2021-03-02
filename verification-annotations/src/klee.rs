@@ -175,9 +175,7 @@ pub fn close_merge() {
 macro_rules! coherent {
     ( $($body:stmt;)+ ) => {
         $crate::open_merge();
-        {
-            $($body;)+
-        }
+        $($body;)+
         $crate::close_merge();
     };
 }
@@ -199,7 +197,7 @@ pub fn report_error(message: &str) -> ! {
 pub fn case_split(x: bool) {
     if x {
         // dummy call to prevent compiler from deleting this call
-        crate::verifier_use_u32(0)
+        // crate::verifier_use_u32(0)
     }
 }
 
