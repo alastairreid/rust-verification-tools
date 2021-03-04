@@ -103,6 +103,132 @@ fn bytes() {
 
 #[cfg_attr(not(feature = "verifier-crux"), test)]
 #[cfg_attr(feature = "verifier-crux", crux_test)]
+fn concretize_exhaustive() {
+    let a: u32 = verifier::AbstractValue::abstract_value();
+    verifier::assume(4 <= a && a <= 7);
+    let a = verifier::concretize_u32(a);
+    println!("a = {}", a)
+}
+
+// hmmm, I thought I had tested this - but it doesn't even
+// compile
+//
+// #[cfg_attr(not(feature = "verifier-crux"), test)]
+// #[cfg_attr(feature = "verifier-crux", crux_test)]
+// fn varied_arrays() {
+//     let n: usize = verifier::AbstractValue::abstract_value();
+//     verifier::assume(4 <= n && n <= 7);
+//     let n = verifier::concretize_usize(n);
+//     let a = [42; n];
+//     println!("n = {}", n);
+//     verifier::assert_eq!(a.len(), n);
+//     verifier::assert_ne!(a[2], 0u8);
+//     verifier::assert_eq!(a[3], 42u8);
+// }
+
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn varied_bytes() {
+    let n: usize = verifier::AbstractValue::abstract_value();
+    verifier::assume(4 <= n && n <= 7);
+    // Comment out the following line to see KLEE complain about allocating an
+    // object whose length is symbolic.
+    // (If you run KLEE without the flag "--exit-on-error", an error is reported
+    // but execution continues with a single concrete value.)
+    //
+    //   KLEE: ERROR: (location information missing) concretized symbolic size
+    //   ...
+    //   Stack:
+    //       #000014533 in __rdl_alloc (, =1)
+    //       #100013891 in __rust_alloc (, =1)
+    //       ...
+    //       #900496959 in _ZN24verification_annotations5tests12varied_bytes17hc04099c3fe734351E () at src/tests.rs:119
+    //   Info:
+    //     size expr: (Extract w64 0 (ZExt w128 (ReadLSB w64 0 unnamed)))
+    //     concretization : 4
+    //     unbound example: 5
+    //
+    let n = verifier::concretize_usize(n);
+    let a = verifier::verifier_nondet_bytes(n);
+    for i in a.iter() {
+        verifier::assume(*i == 42);
+    }
+    if verifier::is_replay() {
+        println!("{:?}", a);
+    }
+    println!("n = {}", n);
+    verifier::assert_eq!(a.len(), n);
+    verifier::assert_ne!(a[2], 0u8);
+    verifier::assert_eq!(a[3], 42u8);
+}
+
+/// Check for colliding assignments
+///
+/// (Not very interesting  - I was confused about this test)
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn collide() {
+    let mut a = [0u32; 100];
+
+    let i: usize = verifier::AbstractValue::abstract_value();
+    verifier::assume(i < 100);
+
+    let j: usize = verifier::AbstractValue::abstract_value();
+    verifier::assume(j < 100);
+
+    a[i] = 42;
+
+    // verifier::concretize_usize(j);
+    verifier::assert_eq!(a[j], if i == j { 42 } else { 0 });
+}
+
+
+/// Copy the first 'n' elements of an array to another
+///
+/// This is a scaling test to explore path explosions
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
+fn copy() {
+    let mut a = [0u32; 100];
+    let mut b = [1u32; 100];
+
+    // choose how much data to copy
+    let n: usize = verifier::AbstractValue::abstract_value();
+    verifier::assume(n <= a.len());
+
+    if false {
+        for i in 0..n {
+            b[i] = a[i];
+        }
+    } else if false {
+        verifier::concretize_usize(n);
+        for i in 0..n {
+            b[i] = a[i];
+        }
+    } else if false {
+        verifier::coherent!{{
+            verifier::concretize_usize(n);
+            for i in 0..n {
+                b[i] = a[i];
+            }
+        }}
+    } else {
+        verifier::sample_u32(16, n as u32) as usize;
+        // verifier::random_sample_u32(4, n as u32) as usize;
+        println!("n = {}", n);
+        for i in 0..n {
+            b[i] = a[i];
+        }
+    }
+
+    let i: usize = verifier::AbstractValue::abstract_value();
+    verifier::assume(i < 100);
+    verifier::assume(i < b.len());
+    verifier::assert_eq!(b[i], if i < n { 0 } else { 1 })
+}
+
+#[cfg_attr(not(feature = "verifier-crux"), test)]
+#[cfg_attr(feature = "verifier-crux", crux_test)]
 fn cstring() {
     let a = verifier::verifier_nondet_cstring(100);
 
