@@ -220,9 +220,9 @@ pub fn close_merge() {
 /// - If the body performs memory allocation, merging cannot happen.
 #[macro_export]
 macro_rules! coherent {
-    ( $($body:stmt;)+ ) => {
+    ( $body:block ) => {
         $crate::open_merge();
-        $($body;)+
+        $body;
         $crate::close_merge();
     };
 }
