@@ -104,15 +104,36 @@ fn bytes() {
 #[cfg_attr(not(feature = "verifier-crux"), test)]
 #[cfg_attr(feature = "verifier-crux", crux_test)]
 fn cstring() {
-    let a = verifier::verifier_nondet_cstring(8);
+    let a = verifier::verifier_nondet_cstring(100);
 
     if verifier::is_replay() {
         println!("{:?}", a);
     }
 
     // force string to be plain ASCII - to keep things simple
-    for i in a.as_bytes() {
-        verifier::assume(i.is_ascii_alphabetic());
+
+    // three variants of this code to deal with path explosion
+    // in different ways
+    if false {
+        // no merging
+        for i in a.as_bytes() {
+            verifier::assume(i.is_ascii_alphabetic());
+        }
+    } else if false {
+        // merging all loop iterations
+        verifier::coherent! {{
+            // force string to be plain ASCII - to keep things simple
+            for i in a.as_bytes() {
+                verifier::assume(i.is_ascii_alphabetic());
+            }
+        }}
+    } else {
+        // merging body of loop only (since number of iterations is constant)
+        for i in a.as_bytes() {
+            verifier::coherent! {{
+                verifier::assume(i.is_ascii_alphabetic());
+            }}
+        }
     }
 
     for i in a.as_bytes() {
