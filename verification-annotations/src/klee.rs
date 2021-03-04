@@ -24,6 +24,7 @@ extern "C" {
     fn klee_abort() -> !;
     fn klee_silent_exit(_ignored: u32) -> !;
     fn klee_is_replay() -> u32;
+    fn klee_is_symbolic(x: usize) -> bool;
     fn klee_choose(x: usize) -> usize;
     fn klee_get_value_i32(x: i32) -> i32;
     fn klee_get_value_i64(x: i64) -> i64;
@@ -166,6 +167,10 @@ pub fn is_replay() -> bool {
     unsafe { klee_is_replay() != 0 }
 }
 
+pub fn is_symbolic_u32(x: u32) -> bool {
+    unsafe { klee_is_symbolic(x as usize) }
+}
+
 pub fn get_value_i32(x: i32) -> i32 {
     unsafe { klee_get_value_i32(x) }
 }
@@ -280,6 +285,29 @@ pub fn sample_u32(samples: usize, x: u32) -> u32 {
         }
     }
     get_value_u32(x)
+}
+
+/// Exhaustively enumerate all possible concrete values for `x`.
+///
+/// If there are a finite number of possible values for `x`,
+/// this terminates because get_value_u32 terminates if there are
+/// no further solutions.
+pub fn concretize_u32(x: u32) -> u32 {
+    loop {
+        let s = get_value_u32(x);
+        if s == x {
+            return s;
+        }
+    }
+}
+
+pub fn concretize_usize(x: usize) -> usize {
+    loop {
+        let s = get_value_u64(x as u64) as usize;
+        if s == x {
+            return s;
+        }
+    }
 }
 
 fn bit(i: u32, x: u32) -> u32 {
