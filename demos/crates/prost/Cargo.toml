@@ -1,0 +1,18 @@
+[package]
+name = "prost"
+version = "0.1.0"
+authors = ["Alastair Reid <adreid@google.com>"]
+edition = "2018"
+
+[build-dependencies]
+prost-build = "0.7.0"
+
+[dependencies]
+prost = "0.7"
+prost-types = "0.7"
+verification-annotations = { path="/home/rust-verification-tools/verification-annotations" }
+
+[features]
+verifier-klee = ["verification-annotations/verifier-klee"]
+verifier-crux = ["verification-annotations/verifier-crux"]
+verifier-seahorn = ["verification-annotations/verifier-seahorn"]
