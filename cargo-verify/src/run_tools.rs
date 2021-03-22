@@ -182,13 +182,28 @@ pub fn clean(opt: &Opt) {
 
 /// Find the name of the crate.
 pub fn get_meta_package_name(opt: &Opt) -> CVResult<String> {
-    let name = MetadataCommand::new()
+    let meta = MetadataCommand::new()
         .manifest_path(&opt.cargo_toml)
         .features(CargoOpt::SomeFeatures(opt.features.clone()))
-        .exec()?
+        .exec()?;
+    let root = meta
         .root_package()
-        .ok_or("no root package")?
-        .name
+        .ok_or("no root package")?;
+
+    fn select_kind(t: &cargo_metadata::Target) -> bool {
+        t.kind.iter().any(|k| k == "bin")
+    }
+
+    let targets: Vec<_> = root.targets.iter().filter(|t| select_kind(t)).collect();
+    let name = match targets[..] {
+        [t] =>
+            &t.name,
+        [] =>
+            Err(format!("Unable to find binary in {}", opt.cargo_toml.to_string_lossy()))?,
+        _ =>
+            Err(format!("Multiple binaries found in {}", opt.cargo_toml.to_string_lossy()))?,
+    };
+    let name = name
         .replace(
             |c| match c {
                 // Allowed characters.
