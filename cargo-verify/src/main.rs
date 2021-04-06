@@ -609,6 +609,15 @@ fn build(opt: &Opt, package: &str, target: &str) -> CVResult<PathBuf> {
         bc_file = new_bc_file;
     }
 
+    {
+        // this optimization pass replaces processor specific intrinsics such as
+        // llvm.x86.avx2.pmovmskb with simpler, more standard LLVM instructions
+        // (sadly, it does not replace all such intrinsics)
+        let new_bc_file = add_pre_ext(&bc_file, "opt");
+        llvm_opt(&opt, &["--instcombine"], &bc_file, &new_bc_file)?;
+        bc_file = new_bc_file;
+    }
+
     Ok(bc_file)
 }
 
@@ -774,6 +783,17 @@ fn patch_llvm(opt: &Opt, options: &[&str], bcfile: &Path, new_bcfile: &Path) -> 
         .arg(new_bcfile)
         .args(options)
         .args(vec!["-v"; opt.verbose])
+        .output_info(&opt, Verbosity::Minor)?;
+    Ok(())
+}
+
+/// Run LLVM's 'opt' tool to apply some optimization passes to a bitcode file
+fn llvm_opt(opt: &Opt, options: &[&str], bcfile: &Path, new_bcfile: &Path) -> CVResult<()> {
+    Command::new("opt")
+        .arg(bcfile)
+        .arg("-o")
+        .arg(new_bcfile)
+        .args(options)
         .output_info(&opt, Verbosity::Minor)?;
     Ok(())
 }
