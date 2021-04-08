@@ -16,14 +16,26 @@ CC = clang-10
 CFLAGS = -flto=thin
 CFLAGS += -O1
 
+RUSTC = rustc
+RSFLAGS = --emit=llvm-bc --crate-type=lib -O
+RSFLAGS += --emit=mir
 LINK = llvm-link-10
 
 C_SRCS := $(wildcard src/*.c)
-OBJS := $(patsubst src/%.c, build_$(TGT)/%.o, $(C_SRCS))
+C_OBJS := $(patsubst src/%.c, build_$(TGT)/%.bc, $(C_SRCS))
 
-build_$(TGT)/%.o: src/%.c
+RS_SRCS := $(wildcard src/*.rs)
+RS_OBJS := $(patsubst src/%.rs, build_$(TGT)/%.bc, $(RS_SRCS))
+
+OBJS := $(C_OBJS) $(RS_OBJS)
+
+build_$(TGT)/%.bc: src/%.c
 	mkdir -p build_$(TGT)
 	$(CC) $(CFLAGS) $^ -c -o $@
+
+build_$(TGT)/%.bc: src/%.rs
+	mkdir -p build_$(TGT)
+	$(RUSTC) $(RSFLAGS) $^ -o $@
 
 rvt-$(TGT).bc: $(OBJS)
 	$(LINK) $(OBJS) -o $@
