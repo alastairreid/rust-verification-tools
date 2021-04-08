@@ -17,7 +17,7 @@ CFLAGS = -flto=thin
 CFLAGS += -O1
 
 RUSTC = rustc
-RSFLAGS = --emit=llvm-bc --crate-type=lib -O
+RSFLAGS = --emit=llvm-bc --crate-type=lib -O -Ctarget-feature=+sse2
 RSFLAGS += --emit=mir
 LINK = llvm-link-10
 
