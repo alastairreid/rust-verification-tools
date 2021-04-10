@@ -101,6 +101,20 @@ fn main() {
         handle_initializers(&context, &mut module);
     }
 
+    if true {
+        let i = get_function(&module, |name| name == "llvm.x86.sse2.pmovmskb.128");
+        let r = get_function(&module, |name| name == "llvm_x86_sse2_pmovmskb_128");
+        match (&i[..], &r[..]) {
+            ([i], [r]) => {
+                println!("Replacing");
+                i.replace_all_uses_with(*r);
+            },
+            _ => {
+                println!("Did not find intrinsics to replace")
+            },
+        }
+    }
+
     if opt.seahorn {
         handle_main(&module);
 
