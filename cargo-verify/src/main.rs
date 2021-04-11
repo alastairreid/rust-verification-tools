@@ -602,7 +602,7 @@ fn build(opt: &Opt, package: &str, target: &str) -> CVResult<PathBuf> {
         let new_bc_file = add_pre_ext(&bc_file, "patch-init-feat");
         patch_llvm(
             &opt,
-            &["--initializers", "--features"],
+            &["--initializers", "--features", "--intrinsics"],
             &bc_file,
             &new_bc_file,
         )?;

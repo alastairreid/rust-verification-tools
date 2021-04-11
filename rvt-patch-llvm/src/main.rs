@@ -8,7 +8,9 @@
 
 use log::info;
 use regex::Regex;
-use std::ffi::OsStr;
+use std::collections::HashMap;
+use std::ffi::{CStr, OsStr};
+use std::iter::FromIterator;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -106,16 +108,27 @@ fn main() {
     }
 
     if opt.intrinsics {
-        let i = get_function(&module, |name| name == "llvm.x86.sse2.pmovmskb.128");
-        let r = get_function(&module, |name| name == "llvm_x86_sse2_pmovmskb_128");
-        match (&i[..], &r[..]) {
-            ([i], [r]) => {
-                println!("Replacing");
+        // intrinsics
+        let is = get_function(&module, |name| name.starts_with("llvm.x86"));
+        let is: HashMap<&CStr, FunctionValue> = HashMap::from_iter(is.iter().map(|f| (f.get_name(), *f)));
+
+        // replacement functions
+        let rs = get_function(&module, |name| name.starts_with("llvm_x86"));
+        let rs: HashMap<&str, FunctionValue> = HashMap::from_iter(rs.iter().filter_map(|f| f.get_name().to_str().ok().map(|nm| (nm, *f))));
+
+        println!("Found intrinsics {:?}", is.keys());
+        println!("Found replacements {:?}", rs.keys());
+
+        // todo: not clear that making is a hashmap was actually needed!
+        for (i_name, i) in is {
+            let r_name = i_name.to_str().expect("valid UTF8 symbol name");
+            let r_name: String= r_name.replace(".", "_");
+            if let Some(r) = rs.get(r_name.as_str()) {
+                println!("Replacing intrinsic {:?} with {}", i_name, r_name);
                 i.replace_all_uses_with(*r);
-            },
-            _ => {
-                println!("Did not find intrinsics to replace")
-            },
+            } else {
+                println!("Did not find replacement for {:?}", i_name);
+            }
         }
     }
 
