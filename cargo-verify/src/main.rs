@@ -602,7 +602,7 @@ fn build(opt: &Opt, package: &str, target: &str) -> CVResult<PathBuf> {
     // todo: This is probably useful with all verifiers - but
     // making it KLEE-only until we have a chance to test it.
     if opt.backend == Backend::Klee {
-        info_at!(&opt, Verbosity::Major, "  Patching LLVM file for initializers and feature tests");
+        info_at!(&opt, Verbosity::Major, "  Patching LLVM file for initializers, feature tests, and SIMD");
         let new_bc_file = add_pre_ext(&bc_file, "patch-init-feat");
         patch_llvm(
             &opt,
