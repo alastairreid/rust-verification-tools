@@ -8,7 +8,9 @@
 
 use log::info;
 use regex::Regex;
-use std::ffi::OsStr;
+use std::collections::HashMap;
+use std::ffi::{CStr, OsStr};
+use std::iter::FromIterator;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -51,6 +53,10 @@ struct Opt {
     /// Call initializers from main
     #[structopt(short, long)]
     initializers: bool,
+
+    /// Substitute function calls for SIMD intrinsic operations
+    #[structopt(short, long)]
+    intrinsics: bool,
 
     /// SeaHorn preparation (conflicts with --initializers)
     #[structopt(short, long, conflicts_with = "initializers")]
@@ -99,6 +105,31 @@ fn main() {
 
     if opt.initializers {
         handle_initializers(&context, &mut module);
+    }
+
+    if opt.intrinsics {
+        // intrinsics
+        let is = get_function(&module, |name| name.starts_with("llvm.x86"));
+        let is: HashMap<&CStr, FunctionValue> = HashMap::from_iter(is.iter().map(|f| (f.get_name(), *f)));
+
+        // replacement functions
+        let rs = get_function(&module, |name| name.starts_with("llvm_x86"));
+        let rs: HashMap<&str, FunctionValue> = HashMap::from_iter(rs.iter().filter_map(|f| f.get_name().to_str().ok().map(|nm| (nm, *f))));
+
+        println!("Found intrinsics {:?}", is.keys());
+        println!("Found replacements {:?}", rs.keys());
+
+        // todo: not clear that making is a hashmap was actually needed!
+        for (i_name, i) in is {
+            let r_name = i_name.to_str().expect("valid UTF8 symbol name");
+            let r_name: String= r_name.replace(".", "_");
+            if let Some(r) = rs.get(r_name.as_str()) {
+                println!("Replacing intrinsic {:?} with {}", i_name, r_name);
+                i.replace_all_uses_with(*r);
+            } else {
+                println!("Did not find replacement for {:?}", i_name);
+            }
+        }
     }
 
     if opt.seahorn {
