@@ -7,7 +7,6 @@
 // except according to those terms.
 
 #![feature(repr_simd)]
-#![feature(abi_vectorcall)]
 
 #[derive(Copy, Clone, Debug)]
 #[allow(non_camel_case_types)]
@@ -36,7 +35,7 @@ pub struct u8x16(u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8, u8)
 
 #[inline]
 #[no_mangle]
-extern "vectorcall" fn veccall_test(a: __m128i, b: __m128i) -> __m128i {
+extern "C" fn veccall_test(a: __m128i, b: __m128i) -> __m128i {
     fn op(x: u8, y: u8) -> u8 {
         if x == y { 0xff } else { 0x0 }
     }
@@ -64,7 +63,7 @@ extern "vectorcall" fn veccall_test(a: __m128i, b: __m128i) -> __m128i {
 
 #[inline]
 #[no_mangle]
-extern "vectorcall" fn llvm_x86_sse2_pcmpeqb_epi8(a: u8x16, b: u8x16) -> u8x16 {
+extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: u8x16, b: u8x16) -> u8x16 {
     fn op(x: u8, y: u8) -> u8 {
         if x == y { 0xff } else { 0x0 }
     }
@@ -89,7 +88,7 @@ extern "vectorcall" fn llvm_x86_sse2_pcmpeqb_epi8(a: u8x16, b: u8x16) -> u8x16 {
 
 #[inline]
 #[no_mangle]
-extern "vectorcall" fn llvm_x86_sse2_pcmpeqw_epi16(a: u16x8, b: u16x8) -> u16x8 {
+extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: u16x8, b: u16x8) -> u16x8 {
     fn op(x: u16, y: u16) -> u16 {
         if x == y { 0xffff } else { 0x0 }
     }
@@ -106,7 +105,7 @@ extern "vectorcall" fn llvm_x86_sse2_pcmpeqw_epi16(a: u16x8, b: u16x8) -> u16x8 
 
 #[inline]
 #[no_mangle]
-extern "vectorcall" fn llvm_x86_sse2_psrli_w(a: u16x8, imm8: i32) -> u16x8 {
+extern "C" fn llvm_x86_sse2_psrli_w(a: u16x8, imm8: i32) -> u16x8 {
     let imm8 = imm8 as u8;
     fn op(x: u16, imm8: u8) -> u16 {
         if imm8 > 15 { 0 } else { x >> imm8 }
@@ -124,7 +123,7 @@ extern "vectorcall" fn llvm_x86_sse2_psrli_w(a: u16x8, imm8: i32) -> u16x8 {
 
 #[inline]
 #[no_mangle]
-extern "vectorcall" fn llvm_x86_sse2_pmovmskb_128(a: u8x16) -> i32 {
+extern "C" fn llvm_x86_sse2_pmovmskb_128(a: u8x16) -> i32 {
     fn op(x: u8) -> i32 {
         ((x >> 7) & 1) as i32
     }
