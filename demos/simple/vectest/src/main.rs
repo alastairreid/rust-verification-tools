@@ -7,9 +7,7 @@ unsafe fn test_mm_cmpeq_epi8(x: i8) {
     let r = _mm_cmpeq_epi8(a, b);
     assert_eq_m128i(
         r,
-        _mm_setr_epi8(
-            0, 0, 0xFFu8 as i8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-        )
+        _mm_setr_epi8(0, 0, 0xFFu8 as i8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
     );
 }
 
@@ -53,10 +51,10 @@ pub unsafe fn assert_eq_m128i(a: __m128i, b: __m128i) {
 
 fn main() {
     println!("Hello, world!");
-    unsafe{ test_mm_cmpeq_epi8(2) };
-    unsafe{ test_mm_cmpeq_epi8(2) };
-    unsafe{ test_mm_xor_si128() };
+    unsafe { test_mm_cmpeq_epi8(2) };
+    unsafe { test_mm_cmpeq_epi8(2) };
+    unsafe { test_mm_xor_si128() };
     for i in -3..3 {
-        unsafe{ test_mm_movemask_epi8(i) };
+        unsafe { test_mm_movemask_epi8(i) };
     }
 }
