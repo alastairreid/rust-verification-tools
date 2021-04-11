@@ -6,6 +6,9 @@ set -e
 make -C runtime TGT=klee
 make -C runtime TGT=seahorn
 
+# The following will generate warnings - these are harmless
+make -C simd_intrinsics
+
 # Build tools
 mkdir -p ${USER_HOME}/bin
 cargo +nightly install --root=${USER_HOME} --path=${RVT_DIR}/rust2calltree
