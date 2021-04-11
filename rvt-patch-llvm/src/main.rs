@@ -52,6 +52,10 @@ struct Opt {
     #[structopt(short, long)]
     initializers: bool,
 
+    /// Substitute function calls for SIMD intrinsic operations
+    #[structopt(short, long)]
+    intrinsics: bool,
+
     /// SeaHorn preparation (conflicts with --initializers)
     #[structopt(short, long, conflicts_with = "initializers")]
     seahorn: bool,
@@ -101,7 +105,7 @@ fn main() {
         handle_initializers(&context, &mut module);
     }
 
-    if true {
+    if opt.intrinsics {
         let i = get_function(&module, |name| name == "llvm.x86.sse2.pmovmskb.128");
         let r = get_function(&module, |name| name == "llvm_x86_sse2_pmovmskb_128");
         match (&i[..], &r[..]) {
