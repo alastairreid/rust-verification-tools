@@ -613,9 +613,7 @@ fn build(opt: &Opt, package: &str, target: &str) -> CVResult<PathBuf> {
         bc_file = new_bc_file;
     }
 
-    // Currently disabled because it objects to the way that we patched
-    // the SIMD intrinsic calls
-    if false {
+    if true {
         // this optimization pass replaces processor specific intrinsics such as
         // llvm.x86.avx2.pmovmskb with simpler, more standard LLVM instructions
         // (sadly, it does not replace all such intrinsics)
