@@ -11,7 +11,7 @@
 
 /// Utilities that capture the common structures in SIMD operations
 /// using 2nd order functions
-mod utils {
+mod vector {
 
     #[derive(Copy, Clone, Debug)]
     #[allow(non_camel_case_types)]
@@ -155,35 +155,47 @@ mod utils {
     }
 }
 
+mod scalar {
+    // todo: there may be some room for sharing code between the different int sizes/signs?
 
-use utils::*;
+    pub fn cmpeq_u8(x: u8, y: u8) -> u8 {
+        if x == y { 0xff } else { 0x0 }
+    }
+
+    pub fn cmpeq_u16(x: u16, y: u16) -> u16 {
+        if x == y { 0xffff } else { 0x0 }
+    }
+
+    /// Logical shift right by 8-bit immediate (0 if shift distance too large)
+    pub fn srl_immed_u16_u8(x: u16, imm8: u8) -> u16 {
+        if imm8 > 15 { 0 } else { x >> imm8 }
+    }
+
+    /// Sign of a u8, expressed as an i32
+    /// (todo: not sure the type of this is ideal)
+    pub fn sign_u8_i32(x: u8) -> i32 {
+        ((x >> 7) & 1) as i32
+    }
+}
+
+use vector::*;
 
 #[inline]
 #[no_mangle]
 extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: simd16<u8>, b: simd16<u8>) -> simd16<u8> {
-    fn op(x: u8, y: u8) -> u8 {
-        if x == y { 0xff } else { 0x0 }
-    }
-    lift16_vv_v(op, a, b)
+    lift16_vv_v(scalar::cmpeq_u8, a, b)
 }
 
 #[inline]
 #[no_mangle]
 extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: simd8<u16>, b: simd8<u16>) -> simd8<u16> {
-    fn op(x: u16, y: u16) -> u16 {
-        if x == y { 0xffff } else { 0x0 }
-    }
-    lift8_vv_v(op, a, b)
+    lift8_vv_v(scalar::cmpeq_u16, a, b)
 }
 
 #[inline]
 #[no_mangle]
 extern "C" fn llvm_x86_sse2_psrli_w(a: simd8<u16>, imm8: i32) -> simd8<u16> {
-    let imm8 = imm8 as u8;
-    fn op(x: u16, imm8: u8) -> u16 {
-        if imm8 > 15 { 0 } else { x >> imm8 }
-    }
-    lift8_vs_v(op, a, imm8)
+    lift8_vs_v(scalar::srl_immed_u16_u8, a, imm8 as u8)
 }
 
 #[inline]
