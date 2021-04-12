@@ -7,8 +7,9 @@
 // except according to those terms.
 
 #![feature(repr_simd)]
+#![allow(unused)]
 
-// This type is identical to the type declared in comp_arch.
+// This type is identical to the type declared in core_arch.
 // It is much less convenient to use in implementations so we
 // actually use the templated definitions simdN<T> below and
 // can transmute arguments/results as needed.
@@ -37,54 +38,122 @@ pub struct simd8<T>(T, T, T, T, T, T, T, T);
 #[repr(simd)]
 pub struct simd16<T>(T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T);
 
-fn map8_vs_v<F>(op: F, a: simd8<u16>, b: u16) -> simd8<u16>
-    where F: Fn(u16, u16) -> u16
+fn lift8_vs_v<F, A, B: Copy, R>(f: F, a: simd8<A>, b: B) -> simd8<R>
+    where F: Fn(A, B) -> R
 {
-    let r0  = op(a.0,  b);
-    let r1  = op(a.1,  b);
-    let r2  = op(a.2,  b);
-    let r3  = op(a.3,  b);
-    let r4  = op(a.4,  b);
-    let r5  = op(a.5,  b);
-    let r6  = op(a.6,  b);
-    let r7  = op(a.7,  b);
+    let r0  = f(a.0,  b);
+    let r1  = f(a.1,  b);
+    let r2  = f(a.2,  b);
+    let r3  = f(a.3,  b);
+    let r4  = f(a.4,  b);
+    let r5  = f(a.5,  b);
+    let r6  = f(a.6,  b);
+    let r7  = f(a.7,  b);
     simd8(r0, r1, r2, r3, r4, r5, r6, r7)
 }
 
-fn map8_vv_v<F>(op: F, a: simd8<u16>, b: simd8<u16>) -> simd8<u16>
-    where F: Fn(u16, u16) -> u16
+fn lift8_vv_v<F, A, B, R>(f: F, a: simd8<A>, b: simd8<B>) -> simd8<R>
+    where F: Fn(A, B) -> R
 {
-    let r0  = op(a.0,  b.0);
-    let r1  = op(a.1,  b.1);
-    let r2  = op(a.2,  b.2);
-    let r3  = op(a.3,  b.3);
-    let r4  = op(a.4,  b.4);
-    let r5  = op(a.5,  b.5);
-    let r6  = op(a.6,  b.6);
-    let r7  = op(a.7,  b.7);
+    let r0  = f(a.0,  b.0);
+    let r1  = f(a.1,  b.1);
+    let r2  = f(a.2,  b.2);
+    let r3  = f(a.3,  b.3);
+    let r4  = f(a.4,  b.4);
+    let r5  = f(a.5,  b.5);
+    let r6  = f(a.6,  b.6);
+    let r7  = f(a.7,  b.7);
     simd8(r0, r1, r2, r3, r4, r5, r6, r7)
 }
 
-fn map16_vv_v<F>(op: F, a: simd16<u8>, b: simd16<u8>) -> simd16<u8>
-    where F: Fn(u8, u8) -> u8
+fn lift16_vv_v<F, A, B, R>(f: F, a: simd16<A>, b: simd16<B>) -> simd16<R>
+    where F: Fn(A, B) -> R
 {
-    let r0  = op(a.0,  b.0);
-    let r1  = op(a.1,  b.1);
-    let r2  = op(a.2,  b.2);
-    let r3  = op(a.3,  b.3);
-    let r4  = op(a.4,  b.4);
-    let r5  = op(a.5,  b.5);
-    let r6  = op(a.6,  b.6);
-    let r7  = op(a.7,  b.7);
-    let r8  = op(a.8,  b.8);
-    let r9  = op(a.9,  b.9);
-    let r10 = op(a.10, b.10);
-    let r11 = op(a.11, b.11);
-    let r12 = op(a.12, b.12);
-    let r13 = op(a.13, b.13);
-    let r14 = op(a.14, b.14);
-    let r15 = op(a.15, b.15);
+    let r0  = f(a.0,  b.0);
+    let r1  = f(a.1,  b.1);
+    let r2  = f(a.2,  b.2);
+    let r3  = f(a.3,  b.3);
+    let r4  = f(a.4,  b.4);
+    let r5  = f(a.5,  b.5);
+    let r6  = f(a.6,  b.6);
+    let r7  = f(a.7,  b.7);
+    let r8  = f(a.8,  b.8);
+    let r9  = f(a.9,  b.9);
+    let r10 = f(a.10, b.10);
+    let r11 = f(a.11, b.11);
+    let r12 = f(a.12, b.12);
+    let r13 = f(a.13, b.13);
+    let r14 = f(a.14, b.14);
+    let r15 = f(a.15, b.15);
     simd16(r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15)
+}
+
+fn reduce2<F, A: Copy>(f: F, a0: A, a1: A) -> A
+    where F: Fn(A, A) -> A
+{
+    f(a0, a1)
+}
+
+fn reduce4<F, A: Copy>(f: F, a0: A, a1: A, a2: A, a3: A) -> A
+    where F: Fn(A, A) -> A
+{
+    f(reduce2(&f, a0, a1), reduce2(&f, a2, a3))
+}
+
+fn reduce8<F, A: Copy>(f: F, a0: A, a1: A, a2: A, a3: A, a4: A, a5: A, a6: A, a7: A) -> A
+    where F: Fn(A, A) -> A
+{
+    f(reduce4(&f, a0, a1, a2, a3), reduce4(&f, a4, a5, a6, a7))
+}
+
+fn reduce16<F, A: Copy>(f: F, a0: A, a1: A, a2: A, a3: A, a4: A, a5: A, a6: A, a7: A, a8: A, a9: A, a10: A, a11: A, a12: A, a13: A, a14: A, a15: A) -> A
+    where F: Fn(A, A) -> A
+{
+    f(reduce8(&f, a0, a1, a2, a3, a4, a5, a6, a7), reduce8(&f, a8, a9, a10, a11, a12, a13, a14, a15))
+}
+
+
+// todo: these reductions may need to use the element number or the size of the reduction
+// (2,4,8,16) as well as the values.
+
+// map f over vectors then reduce with g
+fn lift8_vv_s<F, G, A, B, R: Copy>(f: F, g: G, a: simd8<A>, b: simd8<B>) -> R
+    where F: Fn(A, B) -> R,
+          G: Fn(R, R) -> R
+{
+    let r0  = f(a.0,  b.0);
+    let r1  = f(a.1,  b.1);
+    let r2  = f(a.2,  b.2);
+    let r3  = f(a.3,  b.3);
+    let r4  = f(a.4,  b.4);
+    let r5  = f(a.5,  b.5);
+    let r6  = f(a.6,  b.6);
+    let r7  = f(a.7,  b.7);
+    reduce8(g, r0, r1, r2, r3, r4, r5, r6, r7)
+}
+
+// map f over vectors then reduce with g
+fn lift16_vv_s<F, G, A, B, R: Copy>(f: F, g: G, a: simd16<A>, b: simd16<B>) -> R
+    where F: Fn(A, B) -> R,
+          G: Fn(R, R) -> R
+{
+    let r0  = f(a.0,  b.0);
+    let r1  = f(a.1,  b.1);
+    let r2  = f(a.2,  b.2);
+    let r3  = f(a.3,  b.3);
+    let r4  = f(a.4,  b.4);
+    let r5  = f(a.5,  b.5);
+    let r6  = f(a.6,  b.6);
+    let r7  = f(a.7,  b.7);
+    let r8  = f(a.8,  b.8);
+    let r9  = f(a.9,  b.9);
+    let r10 = f(a.10, b.10);
+    let r11 = f(a.11, b.11);
+    let r12 = f(a.12, b.12);
+    let r13 = f(a.13, b.13);
+    let r14 = f(a.14, b.14);
+    let r15 = f(a.15, b.15);
+    reduce16(g, r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15)
 }
 
 #[inline]
@@ -93,7 +162,7 @@ extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: simd16<u8>, b: simd16<u8>) -> simd16
     fn op(x: u8, y: u8) -> u8 {
         if x == y { 0xff } else { 0x0 }
     }
-    map16_vv_v(op, a, b)
+    lift16_vv_v(op, a, b)
 }
 
 #[inline]
@@ -102,7 +171,7 @@ extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: simd8<u16>, b: simd8<u16>) -> simd8
     fn op(x: u16, y: u16) -> u16 {
         if x == y { 0xffff } else { 0x0 }
     }
-    map8_vv_v(op, a, b)
+    lift8_vv_v(op, a, b)
 }
 
 #[inline]
@@ -112,15 +181,7 @@ extern "C" fn llvm_x86_sse2_psrli_w(a: simd8<u16>, imm8: i32) -> simd8<u16> {
     fn op(x: u16, imm8: u8) -> u16 {
         if imm8 > 15 { 0 } else { x >> imm8 }
     }
-    let r0  = op(a.0, imm8);
-    let r1  = op(a.1, imm8);
-    let r2  = op(a.2, imm8);
-    let r3  = op(a.3, imm8);
-    let r4  = op(a.4, imm8);
-    let r5  = op(a.5, imm8);
-    let r6  = op(a.6, imm8);
-    let r7  = op(a.7, imm8);
-    simd8(r0, r1, r2, r3, r4, r5, r6, r7)
+    lift8_vs_v(op, a, imm8)
 }
 
 #[inline]
