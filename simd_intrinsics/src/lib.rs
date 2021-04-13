@@ -889,6 +889,22 @@ mod vector {
 mod scalar {
     // todo: there may be some room for sharing code between the different int sizes/signs?
 
+    pub fn and64(x: u64, y: u64) -> u64 {
+        x & y
+    }
+
+    pub fn andnot64(x: u64, y: u64) -> u64 {
+        x & !y
+    }
+
+    pub fn or64(x: u64, y: u64) -> u64 {
+        x | y
+    }
+
+    pub fn xor64(x: u64, y: u64) -> u64 {
+        x ^ y
+    }
+
     pub fn cmpeq_u8(x: u8, y: u8) -> u8 {
         if x == y { 0xff } else { 0x0 }
     }
@@ -994,6 +1010,83 @@ extern "C" fn llvm_x86_sse2_pmovmskb_128(a: __m128i) -> i32 {
 
 #[inline]
 #[no_mangle]
-extern "C" fn llvm_x86_avx2_pmovmskb_128(a: __m256i) -> i32 {
-    lift32_v_s(scalar::sign_u8_i32, |i, x, y| x | (y << i), a)
+extern "C" fn _mm_and_si128(a: __m128i, b: __m128i) -> __m128i {
+    lift2_vv_v(scalar::and64, a, b)
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn _mm256_and_si256(a: __m256i, b: __m256i) -> __m256i {
+    lift4_vv_v(scalar::and64, a, b)
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn _mm_andnot_si128(a: __m128i, b: __m128i) -> __m128i {
+    lift2_vv_v(scalar::andnot64, a, b)
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn _mm256_andnot_si256(a: __m256i, b: __m256i) -> __m256i {
+    lift4_vv_v(scalar::andnot64, a, b)
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn _mm_or_si128(a: __m128i, b: __m128i) -> __m128i {
+    lift2_vv_v(scalar::or64, a, b)
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn _mm256_or_si256(a: __m256i, b: __m256i) -> __m256i {
+    lift4_vv_v(scalar::or64, a, b)
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn _mm_xor_si128(a: __m128i, b: __m128i) -> __m128i {
+    lift2_vv_v(scalar::xor64, a, b)
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn _mm256_xor_si256(a: __m256i, b: __m256i) -> __m256i {
+    lift4_vv_v(scalar::xor64, a, b)
+}
+
+
+#[inline]
+#[no_mangle]
+extern "C" fn llvm_x86_ssse3_pshuf_b_128(a: __m128i, b: __m128i) -> __m128i {
+    union U {
+        intel: __m128i,
+        arr: [u8; 16],
+    }
+    let a = unsafe { U{intel: a}.arr };
+    let b = unsafe { U{intel: b}.arr };
+    let mut r = [0; 16];
+    for i in 0..16 {
+        let j = b[i] & 15;
+        r[i] = a[j as usize];
+    }
+    unsafe { U{arr: r}.intel }
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn llvm_x86_ssse3_pshuf_w_128(a: __m128i, b: __m128i) -> __m128i {
+    union U {
+        intel: __m128i,
+        arr: [u16; 8],
+    }
+    let a = unsafe { U{intel: a}.arr };
+    let b = unsafe { U{intel: b}.arr };
+    let mut r = [0; 8];
+    for i in 0..8 {
+        let j = b[i] & 7;
+        r[i] = a[j as usize];
+    }
+    unsafe { U{arr: r}.intel }
 }
