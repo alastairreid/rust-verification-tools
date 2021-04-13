@@ -7,6 +7,7 @@
 // except according to those terms.
 
 #![feature(repr_simd)]
+#![allow(improper_ctypes_definitions)]
 #![allow(unused)]
 
 /// Utilities that capture the common structures in SIMD operations
