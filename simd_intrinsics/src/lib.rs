@@ -14,6 +14,8 @@
 /// using 2nd order functions
 mod vector {
 
+	pub use std::arch::x86_64::{__m128i, __m256i};
+
     /// Implemented by types that support 4-element vectors
     /// Provides methods to construct, destruct and convert vectors to their
     /// native representation.
@@ -264,16 +266,6 @@ mod vector {
         /// Convert the portable representation to the machine-dependent type
         fn from_vec(Self::Vec) -> Self::Machine;
     }
-
-    #[derive(Copy, Clone, Debug)]
-    #[allow(non_camel_case_types)]
-    #[repr(simd)]
-    pub struct __m128i(i64, i64);
-
-    #[derive(Copy, Clone, Debug)]
-    #[allow(non_camel_case_types)]
-    #[repr(simd)]
-    pub struct __m256i(i64, i64, i64, i64);
 
     /// Define From implementations between portable and machine types
     macro_rules! conversions {
