@@ -740,73 +740,150 @@ mod vector {
         R::from_vec(r)
     }
 
-    pub fn reduce2<F, A: Copy>(f: F, a0: A, a1: A) -> A
-        where F: Fn(A, A) -> A
-    {
-        f(a0, a1)
+    // create a function $f to reduce an array of length $n
+    macro_rules! reducer {
+        ($n: expr, $f: ident) => {
+            pub fn $f<F, A: Copy>(f: F, a: [A; $n]) -> A
+                where F: Fn(usize, A, A) -> A
+            {
+                let mut r = a[0];
+                for i in 1..$n {
+                    r = f(i, r, a[i]);
+                }
+                r
+            }
+        }
     }
 
-    pub fn reduce4<F, A: Copy>(f: F, a0: A, a1: A, a2: A, a3: A) -> A
-        where F: Fn(A, A) -> A
+    reducer!(2,  reduce2);
+    reducer!(4,  reduce4);
+    reducer!(8,  reduce8);
+    reducer!(16, reduce16);
+    reducer!(32, reduce32);
+
+    // lift a unary operation over a vector and reduce
+    pub fn lift2_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+        where
+            F: Fn(A) -> R,
+            G: Fn(usize, R, R) -> R,
+            A: Vector4,
+            R: Copy,
     {
-        f(reduce2(&f, a0, a1), reduce2(&f, a2, a3))
+        let a = A::to_vec(a);
+        let r0  = f(A::get0(a));
+        let r1  = f(A::get1(a));
+        reduce2(g, [r0, r1])
     }
 
-    pub fn reduce8<F, A: Copy>(f: F, a0: A, a1: A, a2: A, a3: A, a4: A, a5: A, a6: A, a7: A) -> A
-        where F: Fn(A, A) -> A
+    // lift a unary operation over a vector and reduce
+    pub fn lift4_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+        where
+            F: Fn(A) -> R,
+            G: Fn(usize, R, R) -> R,
+            A: Vector4,
+            R: Copy,
     {
-        f(reduce4(&f, a0, a1, a2, a3), reduce4(&f, a4, a5, a6, a7))
+        let a = A::to_vec(a);
+        let r0  = f(A::get0(a));
+        let r1  = f(A::get1(a));
+        let r2  = f(A::get2(a));
+        let r3  = f(A::get3(a));
+        reduce4(g, [r0, r1, r2, r3])
     }
 
-    pub fn reduce16<F, A: Copy>(f: F, a0: A, a1: A, a2: A, a3: A, a4: A, a5: A, a6: A, a7: A, a8: A, a9: A, a10: A, a11: A, a12: A, a13: A, a14: A, a15: A) -> A
-        where F: Fn(A, A) -> A
+    // lift a unary operation over a vector and reduce
+    pub fn lift8_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+        where
+            F: Fn(A) -> R,
+            G: Fn(usize, R, R) -> R,
+            A: Vector8,
+            R: Copy,
     {
-        f(reduce8(&f, a0, a1, a2, a3, a4, a5, a6, a7), reduce8(&f, a8, a9, a10, a11, a12, a13, a14, a15))
+        let a = A::to_vec(a);
+        let r0  = f(A::get0(a));
+        let r1  = f(A::get1(a));
+        let r2  = f(A::get2(a));
+        let r3  = f(A::get3(a));
+        let r4  = f(A::get4(a));
+        let r5  = f(A::get5(a));
+        let r6  = f(A::get6(a));
+        let r7  = f(A::get7(a));
+        reduce8(g, [r0, r1, r2, r3, r4, r5, r6, r7])
     }
 
+    // lift a unary operation over a vector and reduce
+    pub fn lift16_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+        where
+            F: Fn(A) -> R,
+            G: Fn(usize, R, R) -> R,
+            A: Vector16,
+            R: Copy,
+    {
+        let a = A::to_vec(a);
+        let r0  = f(A::get0(a));
+        let r1  = f(A::get1(a));
+        let r2  = f(A::get2(a));
+        let r3  = f(A::get3(a));
+        let r4  = f(A::get4(a));
+        let r5  = f(A::get5(a));
+        let r6  = f(A::get6(a));
+        let r7  = f(A::get7(a));
+        let r8  = f(A::get8(a));
+        let r9  = f(A::get9(a));
+        let r10 = f(A::get10(a));
+        let r11 = f(A::get11(a));
+        let r12 = f(A::get12(a));
+        let r13 = f(A::get13(a));
+        let r14 = f(A::get14(a));
+        let r15 = f(A::get15(a));
+        reduce16(g, [r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15])
+    }
 
-    // todo: these reductions may need to use the element number or the size of the reduction
-    // (2,4,8,16) as well as the values.
+    // lift a unary operation over a vector and reduce
+    pub fn lift32_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+        where
+            F: Fn(A) -> R,
+            G: Fn(usize, R, R) -> R,
+            A: Vector32,
+            R: Copy,
+    {
+        let a = A::to_vec(a);
+        let r0  = f(A::get0(a));
+        let r1  = f(A::get1(a));
+        let r2  = f(A::get2(a));
+        let r3  = f(A::get3(a));
+        let r4  = f(A::get4(a));
+        let r5  = f(A::get5(a));
+        let r6  = f(A::get6(a));
+        let r7  = f(A::get7(a));
+        let r8  = f(A::get8(a));
+        let r9  = f(A::get9(a));
+        let r10 = f(A::get10(a));
+        let r11 = f(A::get11(a));
+        let r12 = f(A::get12(a));
+        let r13 = f(A::get13(a));
+        let r14 = f(A::get14(a));
+        let r15 = f(A::get15(a));
+        let r16 = f(A::get16(a));
+        let r17 = f(A::get17(a));
+        let r18 = f(A::get18(a));
+        let r19 = f(A::get19(a));
+        let r20 = f(A::get20(a));
+        let r21 = f(A::get21(a));
+        let r22 = f(A::get22(a));
+        let r23 = f(A::get23(a));
+        let r24 = f(A::get24(a));
+        let r25 = f(A::get25(a));
+        let r26 = f(A::get26(a));
+        let r27 = f(A::get27(a));
+        let r28 = f(A::get28(a));
+        let r29 = f(A::get29(a));
+        let r30 = f(A::get30(a));
+        let r31 = f(A::get31(a));
+        reduce32(g, [r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
+                     r16, r17, r18, r19, r20, r21, r22, r23, r24, r25, r26, r27, r28, r29, r30, r31])
+    }
 
-    // // map f over vectors then reduce with g
-    // pub fn lift8_vv_s<F, G, A, B, R: Copy>(f: F, g: G, a: simd8<A>, b: simd8<B>) -> R
-    //     where F: Fn(A, B) -> R,
-    //           G: Fn(R, R) -> R
-    // {
-    //     let r0  = f(a.0,  b.0);
-    //     let r1  = f(a.1,  b.1);
-    //     let r2  = f(a.2,  b.2);
-    //     let r3  = f(a.3,  b.3);
-    //     let r4  = f(a.4,  b.4);
-    //     let r5  = f(a.5,  b.5);
-    //     let r6  = f(a.6,  b.6);
-    //     let r7  = f(a.7,  b.7);
-    //     reduce8(g, r0, r1, r2, r3, r4, r5, r6, r7)
-    // }
-
-    // // map f over vectors then reduce with g
-    // pub fn lift16_vv_s<F, G, A, B, R: Copy>(f: F, g: G, a: simd16<A>, b: simd16<B>) -> R
-    //     where F: Fn(A, B) -> R,
-    //           G: Fn(R, R) -> R
-    // {
-    //     let r0  = f(a.0,  b.0);
-    //     let r1  = f(a.1,  b.1);
-    //     let r2  = f(a.2,  b.2);
-    //     let r3  = f(a.3,  b.3);
-    //     let r4  = f(a.4,  b.4);
-    //     let r5  = f(a.5,  b.5);
-    //     let r6  = f(a.6,  b.6);
-    //     let r7  = f(a.7,  b.7);
-    //     let r8  = f(a.8,  b.8);
-    //     let r9  = f(a.9,  b.9);
-    //     let r10 = f(a.10, b.10);
-    //     let r11 = f(a.11, b.11);
-    //     let r12 = f(a.12, b.12);
-    //     let r13 = f(a.13, b.13);
-    //     let r14 = f(a.14, b.14);
-    //     let r15 = f(a.15, b.15);
-    //     reduce16(g, r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15)
-    // }
 }
 
 mod scalar {
@@ -912,29 +989,11 @@ extern "C" fn llvm_x86_avx2_psrli_q(a: __m256i, imm8: i32) -> __m256i {
 #[inline]
 #[no_mangle]
 extern "C" fn llvm_x86_sse2_pmovmskb_128(a: __m128i) -> i32 {
-    fn f(x: u8) -> i32 {
-        ((x >> 7) & 1) as i32
-    }
-    let a = <u8 as Vector16>::to_vec(a);
-    let r0  = f(<u8 as Vector16>::get0(a));
-    let r1  = f(<u8 as Vector16>::get1(a));
-    let r2  = f(<u8 as Vector16>::get2(a));
-    let r3  = f(<u8 as Vector16>::get3(a));
-    let r4  = f(<u8 as Vector16>::get4(a));
-    let r5  = f(<u8 as Vector16>::get5(a));
-    let r6  = f(<u8 as Vector16>::get6(a));
-    let r7  = f(<u8 as Vector16>::get7(a));
-    let r8  = f(<u8 as Vector16>::get8(a));
-    let r9  = f(<u8 as Vector16>::get9(a));
-    let r10 = f(<u8 as Vector16>::get10(a));
-    let r11 = f(<u8 as Vector16>::get11(a));
-    let r12 = f(<u8 as Vector16>::get12(a));
-    let r13 = f(<u8 as Vector16>::get13(a));
-    let r14 = f(<u8 as Vector16>::get14(a));
-    let r15 = f(<u8 as Vector16>::get15(a));
-    let r = (r0  << 0)  | (r1  << 1)  | (r2  << 2)  | (r3  << 3)
-          | (r4  << 4)  | (r5  << 5)  | (r6  << 6)  | (r7  << 7)
-          | (r8  << 8)  | (r9  << 9)  | (r10 << 10) | (r11 << 11)
-          | (r12 << 12) | (r13 << 13) | (r14 << 14) | (r15 << 15);
-    r
+    lift16_v_s(scalar::sign_u8_i32, |i, x, y| x | (y << i), a)
+}
+
+#[inline]
+#[no_mangle]
+extern "C" fn llvm_x86_avx2_pmovmskb_128(a: __m256i) -> i32 {
+    lift32_v_s(scalar::sign_u8_i32, |i, x, y| x | (y << i), a)
 }
