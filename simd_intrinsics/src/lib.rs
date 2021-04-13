@@ -760,6 +760,24 @@ mod vector {
     vector4!(u64, u64x4, __m256i);
 
     vector2!(u64, u64x2, __m128i);
+    vector2!(u128, u128x2, __m256i);
+
+    pub fn from_u128(x: u128) -> __m128i {
+        union U {
+            intel: __m128i,
+            u128: u128,
+        }
+        unsafe { U { u128: x }.intel }
+    }
+
+    pub fn to_u128(x: __m128i) -> u128 {
+        union U {
+            intel: __m128i,
+            u128: u128,
+        }
+        unsafe { U { intel: x }.u128 }
+    }
+
 
     // lift a binary operation over vector and scalar
     pub fn lift2_vs_v<F, A, B, R>(f: F, a: A::Machine, b: B) -> R::Machine
@@ -1552,11 +1570,7 @@ unsafe extern "C" fn _mm_cvtsi128_si32(a: __m128i) -> i32 {
 pub unsafe fn _mm_srli_si128(a: __m128i, imm8: i32) -> __m128i {
     let imm8: u8 = imm8 as u8;
     let imm8 = if imm8 > 15 { 16 } else { imm8 };
-    union U {
-        intel: __m128i,
-        u128: u128,
-    }
-    let a = unsafe { U { intel: a }.u128 };
+    let a = to_u128(a);
     let r = a >> (8 * imm8);
-    unsafe { U { u128: r }.intel }
+    from_u128(r)
 }
