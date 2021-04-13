@@ -14,7 +14,7 @@
 /// using 2nd order functions
 mod vector {
 
-	pub use std::arch::x86_64::{__m128i, __m256i};
+    pub use std::arch::x86_64::{__m128i, __m256i};
 
     /// Implemented by types that support 4-element vectors
     /// Provides methods to construct, destruct and convert vectors to their
@@ -1500,11 +1500,11 @@ unsafe extern "C" fn llvm_x86_ssse3_pshuf_w_128(a: __m128i, b: __m128i) -> __m12
 #[no_mangle]
 unsafe extern "C" fn _mm_loadu_si128(mem_addr: *const __m128i) -> __m128i {
     let mut dst: __m128i = _mm_set1_epi8(0);
-	std::ptr::copy_nonoverlapping(
-		mem_addr as *const u8,
-		&mut dst as *mut __m128i as *mut u8,
-		std::mem::size_of::<__m128i>(),
-	);
+    std::ptr::copy_nonoverlapping(
+        mem_addr as *const u8,
+        &mut dst as *mut __m128i as *mut u8,
+        std::mem::size_of::<__m128i>(),
+    );
     dst
 }
 
@@ -1512,30 +1512,51 @@ unsafe extern "C" fn _mm_loadu_si128(mem_addr: *const __m128i) -> __m128i {
 #[no_mangle]
 unsafe extern "C" fn _mm256_loadu_si256(mem_addr: *const __m256i) -> __m256i {
     let mut dst: __m256i = _mm256_set1_epi8(0);
-	std::ptr::copy_nonoverlapping(
-		mem_addr as *const u8,
-		&mut dst as *mut __m256i as *mut u8,
-		std::mem::size_of::<__m256i>(),
-	);
+    std::ptr::copy_nonoverlapping(
+        mem_addr as *const u8,
+        &mut dst as *mut __m256i as *mut u8,
+        std::mem::size_of::<__m256i>(),
+    );
     dst
 }
 
 #[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_storeu_si128(mem_addr: *mut __m128i, a: __m128i) {
-	std::ptr::copy_nonoverlapping(
-		&a as *const __m128i as *const u8,
-		mem_addr as *mut u8,
-		std::mem::size_of::<__m128i>(),
-	)
+    std::ptr::copy_nonoverlapping(
+        &a as *const __m128i as *const u8,
+        mem_addr as *mut u8,
+        std::mem::size_of::<__m128i>(),
+    )
 }
 
 #[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_storeu_si256(mem_addr: *mut __m256i, a: __m256i) {
-	std::ptr::copy_nonoverlapping(
-		&a as *const __m256i as *const u8,
-		mem_addr as *mut u8,
-		std::mem::size_of::<__m256i>(),
-	)
+    std::ptr::copy_nonoverlapping(
+        &a as *const __m256i as *const u8,
+        mem_addr as *mut u8,
+        std::mem::size_of::<__m256i>(),
+    )
+}
+
+#[inline]
+#[no_mangle]
+unsafe extern "C" fn _mm_cvtsi128_si32(a: __m128i) -> i32 {
+    let a: u32x4 = a.into();
+    a.0 as i32
+}
+
+#[inline]
+#[no_mangle]
+pub unsafe fn _mm_srli_si128(a: __m128i, imm8: i32) -> __m128i {
+    let imm8: u8 = imm8 as u8;
+    let imm8 = if imm8 > 15 { 16 } else { imm8 };
+    union U {
+        intel: __m128i,
+        u128: u128,
+    }
+    let a = unsafe { U { intel: a }.u128 };
+    let r = a >> (8 * imm8);
+    unsafe { U { u128: r }.intel }
 }
