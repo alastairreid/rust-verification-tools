@@ -14,77 +14,348 @@
 /// using 2nd order functions
 mod vector {
 
-    #[derive(Copy, Clone, Debug)]
-    #[allow(non_camel_case_types)]
-    #[repr(simd)]
-    pub struct simd2<T>(pub T, pub T);
+    /// Implemented by types that support 4-element vectors
+    /// Provides methods to construct, destruct and convert vectors to their
+    /// native representation.
+    pub trait Vector4
+        where
+            Self: Copy,
+            Self::Vec: Copy,
+    {
+        /// Portable type used to represent vectors
+        type Vec;
+
+        /// Machine-dependent type used to represent vectors
+        type Machine;
+
+        /// Construct a vector from individual elements
+        fn new(x0: Self, x1: Self, x2: Self, x3: Self) -> Self::Vec;
+
+        /// Extract elements from a vector
+        fn get0(x: Self::Vec) -> Self;
+        fn get1(x: Self::Vec) -> Self;
+        fn get2(x: Self::Vec) -> Self;
+        fn get3(x: Self::Vec) -> Self;
+
+        /// Convert the machine-dependent type to the portable representation
+        fn to_vec(Self::Machine) -> Self::Vec;
+
+        /// Convert the portable representation to the machine-dependent type
+        fn from_vec(Self::Vec) -> Self::Machine;
+    }
+
+    /// Implemented by types that support 8-element vectors
+    /// Provides methods to construct, destruct and convert vectors to their
+    /// native representation.
+    pub trait Vector8
+        where
+            Self: Copy,
+            Self::Vec: Copy,
+    {
+        /// Portable type used to represent vectors
+        type Vec;
+
+        /// Machine-dependent type used to represent vectors
+        type Machine;
+
+        /// Construct a vector from individual elements
+        fn new(x0: Self, x1: Self, x2: Self, x3: Self, x4: Self, x5: Self, x6: Self, x7: Self) -> Self::Vec;
+
+        /// Extract elements from a vector
+        fn get0(x: Self::Vec) -> Self;
+        fn get1(x: Self::Vec) -> Self;
+        fn get2(x: Self::Vec) -> Self;
+        fn get3(x: Self::Vec) -> Self;
+        fn get4(x: Self::Vec) -> Self;
+        fn get5(x: Self::Vec) -> Self;
+        fn get6(x: Self::Vec) -> Self;
+        fn get7(x: Self::Vec) -> Self;
+
+        /// Convert the machine-dependent type to the portable representation
+        fn to_vec(Self::Machine) -> Self::Vec;
+
+        /// Convert the portable representation to the machine-dependent type
+        fn from_vec(Self::Vec) -> Self::Machine;
+    }
+
+    /// Implemented by types that support 16-element vectors
+    /// Provides methods to construct, destruct and convert vectors to their
+    /// native representation.
+    pub trait Vector16
+        where
+            Self: Copy,
+            Self::Vec: Copy,
+    {
+        /// Portable type used to represent vectors
+        type Vec;
+
+        /// Machine-dependent type used to represent vectors
+        type Machine;
+
+        /// Construct a vector from individual elements
+        fn new(x0: Self, x1: Self, x2: Self, x3: Self, x4: Self, x5: Self, x6: Self, x7: Self,
+               x8: Self, x9: Self, x10: Self, x11: Self, x12: Self, x13: Self, x14: Self, x15: Self) -> Self::Vec;
+
+        /// Extract elements from a vector
+        fn get0(x: Self::Vec) -> Self;
+        fn get1(x: Self::Vec) -> Self;
+        fn get2(x: Self::Vec) -> Self;
+        fn get3(x: Self::Vec) -> Self;
+        fn get4(x: Self::Vec) -> Self;
+        fn get5(x: Self::Vec) -> Self;
+        fn get6(x: Self::Vec) -> Self;
+        fn get7(x: Self::Vec) -> Self;
+        fn get8(x: Self::Vec) -> Self;
+        fn get9(x: Self::Vec) -> Self;
+        fn get10(x: Self::Vec) -> Self;
+        fn get11(x: Self::Vec) -> Self;
+        fn get12(x: Self::Vec) -> Self;
+        fn get13(x: Self::Vec) -> Self;
+        fn get14(x: Self::Vec) -> Self;
+        fn get15(x: Self::Vec) -> Self;
+
+        /// Convert the machine-dependent type to the portable representation
+        fn to_vec(Self::Machine) -> Self::Vec;
+
+        /// Convert the portable representation to the machine-dependent type
+        fn from_vec(Self::Vec) -> Self::Machine;
+    }
 
     #[derive(Copy, Clone, Debug)]
     #[allow(non_camel_case_types)]
     #[repr(simd)]
-    pub struct simd4<T>(pub T, pub T, pub T, pub T);
+    pub struct __m128i(i64, i64);
 
     #[derive(Copy, Clone, Debug)]
     #[allow(non_camel_case_types)]
     #[repr(simd)]
-    pub struct simd8<T>(pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T);
+    pub struct __m256i(i64, i64, i64, i64);
 
-    #[derive(Copy, Clone, Debug)]
-    #[allow(non_camel_case_types)]
-    #[repr(simd)]
-    pub struct simd16<T>(pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T, pub T);
+    /// Define From implementations between portable and machine types
+    macro_rules! conversions {
+        ($pty: ty, $mty: ty) => {
+            impl From<$mty> for $pty {
+                fn from(x: $mty) -> Self {
+                    union U {
+                        intel: $mty,
+                        sane: $pty,
+                    }
+                    let u = U{intel: x};
+                    unsafe { u.sane }
+                }
+            }
+
+            impl From<$pty> for $mty {
+                fn from(x: $pty) -> Self {
+                    union U {
+                        intel: $mty,
+                        sane: $pty,
+                    }
+                    let u = U{sane: x};
+                    unsafe { u.intel }
+                }
+            }
+        }
+    }
+
+    /// Define Vector4 implementation for vectors of $ety and constructor $c
+    macro_rules! vector4 {
+        ($ety: ty, $pty: ident, $mty: ty) => {
+            #[derive(Copy, Clone, Debug)]
+            #[allow(non_camel_case_types)]
+            #[repr(simd)]
+            pub struct $pty(pub $ety, pub $ety, pub $ety, pub $ety);
+
+            conversions!($pty, $mty);
+
+            impl Vector4 for $ety {
+                type Machine = $mty;
+                type Vec = $pty;
+
+                fn new(x0: Self, x1: Self, x2: Self, x3: Self) -> Self::Vec {
+                    $pty(x0, x1, x2, x3)
+                }
+
+                fn get0(x: Self::Vec) -> Self { x.0 }
+                fn get1(x: Self::Vec) -> Self { x.1 }
+                fn get2(x: Self::Vec) -> Self { x.2 }
+                fn get3(x: Self::Vec) -> Self { x.3 }
+
+                fn to_vec(x: Self::Machine) -> Self::Vec {
+                    x.into()
+                }
+                fn from_vec(x: Self::Vec) -> Self::Machine {
+                    x.into()
+                }
+            }
+        }
+    }
+
+    /// Define Vector8 implementation for vectors of $ety and constructor $c
+    macro_rules! vector8 {
+        ($ety: ty, $pty: ident, $mty: ty) => {
+            #[derive(Copy, Clone, Debug)]
+            #[allow(non_camel_case_types)]
+            #[repr(simd)]
+            pub struct $pty(pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety);
+
+            conversions!($pty, $mty);
+
+            impl Vector8 for $ety {
+                type Machine = $mty;
+                type Vec = $pty;
+
+                fn new(x0: Self, x1: Self, x2: Self, x3: Self, x4: Self, x5: Self, x6: Self, x7: Self) -> Self::Vec {
+                    $pty(x0, x1, x2, x3, x4, x5, x6, x7)
+                }
+
+                fn get0(x: Self::Vec) -> Self { x.0 }
+                fn get1(x: Self::Vec) -> Self { x.1 }
+                fn get2(x: Self::Vec) -> Self { x.2 }
+                fn get3(x: Self::Vec) -> Self { x.3 }
+                fn get4(x: Self::Vec) -> Self { x.4 }
+                fn get5(x: Self::Vec) -> Self { x.5 }
+                fn get6(x: Self::Vec) -> Self { x.6 }
+                fn get7(x: Self::Vec) -> Self { x.7 }
+
+                fn to_vec(x: Self::Machine) -> Self::Vec {
+                    x.into()
+                }
+                fn from_vec(x: Self::Vec) -> Self::Machine {
+                    x.into()
+                }
+            }
+        }
+    }
+
+    /// Define Vector8 implementation for vectors of $ety and constructor $c
+    macro_rules! vector16 {
+        ($ety: ty, $pty: ident, $mty: ty) => {
+            #[derive(Copy, Clone, Debug)]
+            #[allow(non_camel_case_types)]
+            #[repr(simd)]
+            pub struct $pty(
+                pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety,
+                pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety, pub $ety);
+
+            conversions!($pty, $mty);
+
+            impl Vector16 for $ety {
+                type Machine = $mty;
+                type Vec = $pty;
+
+                fn new(x0: Self, x1: Self, x2: Self, x3: Self, x4: Self, x5: Self, x6: Self, x7: Self,
+                       x8: Self, x9: Self, x10: Self, x11: Self, x12: Self, x13: Self, x14: Self, x15: Self) -> Self::Vec {
+                    $pty(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15)
+                }
+
+                fn get0(x: Self::Vec) -> Self { x.0 }
+                fn get1(x: Self::Vec) -> Self { x.1 }
+                fn get2(x: Self::Vec) -> Self { x.2 }
+                fn get3(x: Self::Vec) -> Self { x.3 }
+                fn get4(x: Self::Vec) -> Self { x.4 }
+                fn get5(x: Self::Vec) -> Self { x.5 }
+                fn get6(x: Self::Vec) -> Self { x.6 }
+                fn get7(x: Self::Vec) -> Self { x.7 }
+                fn get8(x: Self::Vec) -> Self { x.8 }
+                fn get9(x: Self::Vec) -> Self { x.9 }
+                fn get10(x: Self::Vec) -> Self { x.10 }
+                fn get11(x: Self::Vec) -> Self { x.11 }
+                fn get12(x: Self::Vec) -> Self { x.12 }
+                fn get13(x: Self::Vec) -> Self { x.13 }
+                fn get14(x: Self::Vec) -> Self { x.14 }
+                fn get15(x: Self::Vec) -> Self { x.15 }
+
+                fn to_vec(x: Self::Machine) -> Self::Vec {
+                    x.into()
+                }
+                fn from_vec(x: Self::Vec) -> Self::Machine {
+                    x.into()
+                }
+            }
+        }
+    }
+
+    vector4!(u32, u32x4, __m128i);
+    vector4!(u64, u64x4, __m256i);
+
+    vector8!(u16, u16x8, __m128i);
+    vector8!(u32, u32x8, __m256i);
+
+    vector16!(u8,  u8x16, __m128i);
+    vector16!(u16, u16x16, __m256i);
 
     // lift a binary operation over a vector and a scalar (replicating the scalar)
-    pub fn lift8_vs_v<F, A, B: Copy, R>(f: F, a: simd8<A>, b: B) -> simd8<R>
-        where F: Fn(A, B) -> R
+    pub fn lift8_vs_v<F, A, B, R>(f: F, a: A::Machine, b: B) -> R::Machine
+        where
+            F: Fn(A, B) -> R,
+            A: Vector8,
+            B: Copy,
+            R: Vector8,
     {
-        let r0  = f(a.0,  b);
-        let r1  = f(a.1,  b);
-        let r2  = f(a.2,  b);
-        let r3  = f(a.3,  b);
-        let r4  = f(a.4,  b);
-        let r5  = f(a.5,  b);
-        let r6  = f(a.6,  b);
-        let r7  = f(a.7,  b);
-        simd8(r0, r1, r2, r3, r4, r5, r6, r7)
+        let a = A::to_vec(a);
+        let r0  = f(A::get0(a), b);
+        let r1  = f(A::get1(a), b);
+        let r2  = f(A::get2(a), b);
+        let r3  = f(A::get3(a), b);
+        let r4  = f(A::get4(a), b);
+        let r5  = f(A::get5(a), b);
+        let r6  = f(A::get6(a), b);
+        let r7  = f(A::get7(a), b);
+        let r = R::new(r0, r1, r2, r3, r4, r5, r6, r7);
+        R::from_vec(r)
     }
 
     // lift a binary operation over two vectors
-    pub fn lift8_vv_v<F, A, B, R>(f: F, a: simd8<A>, b: simd8<B>) -> simd8<R>
-        where F: Fn(A, B) -> R
+    pub fn lift8_vv_v<F, A, B, R>(f: F, a: A::Machine, b: B::Machine) -> R::Machine
+        where
+            F: Fn(A, B) -> R,
+            A: Vector8,
+            B: Vector8,
+            R: Vector8,
     {
-        let r0  = f(a.0,  b.0);
-        let r1  = f(a.1,  b.1);
-        let r2  = f(a.2,  b.2);
-        let r3  = f(a.3,  b.3);
-        let r4  = f(a.4,  b.4);
-        let r5  = f(a.5,  b.5);
-        let r6  = f(a.6,  b.6);
-        let r7  = f(a.7,  b.7);
-        simd8(r0, r1, r2, r3, r4, r5, r6, r7)
+        let a = A::to_vec(a);
+        let b = B::to_vec(b);
+        let r0  = f(A::get0(a),  B::get0(b));
+        let r1  = f(A::get1(a),  B::get1(b));
+        let r2  = f(A::get2(a),  B::get2(b));
+        let r3  = f(A::get3(a),  B::get3(b));
+        let r4  = f(A::get4(a),  B::get4(b));
+        let r5  = f(A::get5(a),  B::get5(b));
+        let r6  = f(A::get6(a),  B::get6(b));
+        let r7  = f(A::get7(a),  B::get7(b));
+        let r = R::new(r0, r1, r2, r3, r4, r5, r6, r7);
+        R::from_vec(r)
     }
 
     // lift a binary operation over two vectors
-    pub fn lift16_vv_v<F, A, B, R>(f: F, a: simd16<A>, b: simd16<B>) -> simd16<R>
-        where F: Fn(A, B) -> R
+    pub fn lift16_vv_v<F, A, B, R>(f: F, a: A::Machine, b: B::Machine) -> R::Machine
+        where
+            F: Fn(A, B) -> R,
+            A: Vector16,
+            B: Vector16,
+            R: Vector16,
     {
-        let r0  = f(a.0,  b.0);
-        let r1  = f(a.1,  b.1);
-        let r2  = f(a.2,  b.2);
-        let r3  = f(a.3,  b.3);
-        let r4  = f(a.4,  b.4);
-        let r5  = f(a.5,  b.5);
-        let r6  = f(a.6,  b.6);
-        let r7  = f(a.7,  b.7);
-        let r8  = f(a.8,  b.8);
-        let r9  = f(a.9,  b.9);
-        let r10 = f(a.10, b.10);
-        let r11 = f(a.11, b.11);
-        let r12 = f(a.12, b.12);
-        let r13 = f(a.13, b.13);
-        let r14 = f(a.14, b.14);
-        let r15 = f(a.15, b.15);
-        simd16(r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15)
+        let a = A::to_vec(a);
+        let b = B::to_vec(b);
+        let r0  = f(A::get0(a),  B::get0(b));
+        let r1  = f(A::get1(a),  B::get1(b));
+        let r2  = f(A::get2(a),  B::get2(b));
+        let r3  = f(A::get3(a),  B::get3(b));
+        let r4  = f(A::get4(a),  B::get4(b));
+        let r5  = f(A::get5(a),  B::get5(b));
+        let r6  = f(A::get6(a),  B::get6(b));
+        let r7  = f(A::get7(a),  B::get7(b));
+        let r8  = f(A::get8(a),  B::get8(b));
+        let r9  = f(A::get9(a),  B::get9(b));
+        let r10 = f(A::get10(a), B::get10(b));
+        let r11 = f(A::get11(a), B::get11(b));
+        let r12 = f(A::get12(a), B::get12(b));
+        let r13 = f(A::get13(a), B::get13(b));
+        let r14 = f(A::get14(a), B::get14(b));
+        let r15 = f(A::get15(a), B::get15(b));
+        let r = R::new(r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15);
+        R::from_vec(r)
     }
 
     pub fn reduce2<F, A: Copy>(f: F, a0: A, a1: A) -> A
@@ -115,45 +386,45 @@ mod vector {
     // todo: these reductions may need to use the element number or the size of the reduction
     // (2,4,8,16) as well as the values.
 
-    // map f over vectors then reduce with g
-    pub fn lift8_vv_s<F, G, A, B, R: Copy>(f: F, g: G, a: simd8<A>, b: simd8<B>) -> R
-        where F: Fn(A, B) -> R,
-              G: Fn(R, R) -> R
-    {
-        let r0  = f(a.0,  b.0);
-        let r1  = f(a.1,  b.1);
-        let r2  = f(a.2,  b.2);
-        let r3  = f(a.3,  b.3);
-        let r4  = f(a.4,  b.4);
-        let r5  = f(a.5,  b.5);
-        let r6  = f(a.6,  b.6);
-        let r7  = f(a.7,  b.7);
-        reduce8(g, r0, r1, r2, r3, r4, r5, r6, r7)
-    }
+    // // map f over vectors then reduce with g
+    // pub fn lift8_vv_s<F, G, A, B, R: Copy>(f: F, g: G, a: simd8<A>, b: simd8<B>) -> R
+    //     where F: Fn(A, B) -> R,
+    //           G: Fn(R, R) -> R
+    // {
+    //     let r0  = f(a.0,  b.0);
+    //     let r1  = f(a.1,  b.1);
+    //     let r2  = f(a.2,  b.2);
+    //     let r3  = f(a.3,  b.3);
+    //     let r4  = f(a.4,  b.4);
+    //     let r5  = f(a.5,  b.5);
+    //     let r6  = f(a.6,  b.6);
+    //     let r7  = f(a.7,  b.7);
+    //     reduce8(g, r0, r1, r2, r3, r4, r5, r6, r7)
+    // }
 
-    // map f over vectors then reduce with g
-    pub fn lift16_vv_s<F, G, A, B, R: Copy>(f: F, g: G, a: simd16<A>, b: simd16<B>) -> R
-        where F: Fn(A, B) -> R,
-              G: Fn(R, R) -> R
-    {
-        let r0  = f(a.0,  b.0);
-        let r1  = f(a.1,  b.1);
-        let r2  = f(a.2,  b.2);
-        let r3  = f(a.3,  b.3);
-        let r4  = f(a.4,  b.4);
-        let r5  = f(a.5,  b.5);
-        let r6  = f(a.6,  b.6);
-        let r7  = f(a.7,  b.7);
-        let r8  = f(a.8,  b.8);
-        let r9  = f(a.9,  b.9);
-        let r10 = f(a.10, b.10);
-        let r11 = f(a.11, b.11);
-        let r12 = f(a.12, b.12);
-        let r13 = f(a.13, b.13);
-        let r14 = f(a.14, b.14);
-        let r15 = f(a.15, b.15);
-        reduce16(g, r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15)
-    }
+    // // map f over vectors then reduce with g
+    // pub fn lift16_vv_s<F, G, A, B, R: Copy>(f: F, g: G, a: simd16<A>, b: simd16<B>) -> R
+    //     where F: Fn(A, B) -> R,
+    //           G: Fn(R, R) -> R
+    // {
+    //     let r0  = f(a.0,  b.0);
+    //     let r1  = f(a.1,  b.1);
+    //     let r2  = f(a.2,  b.2);
+    //     let r3  = f(a.3,  b.3);
+    //     let r4  = f(a.4,  b.4);
+    //     let r5  = f(a.5,  b.5);
+    //     let r6  = f(a.6,  b.6);
+    //     let r7  = f(a.7,  b.7);
+    //     let r8  = f(a.8,  b.8);
+    //     let r9  = f(a.9,  b.9);
+    //     let r10 = f(a.10, b.10);
+    //     let r11 = f(a.11, b.11);
+    //     let r12 = f(a.12, b.12);
+    //     let r13 = f(a.13, b.13);
+    //     let r14 = f(a.14, b.14);
+    //     let r15 = f(a.15, b.15);
+    //     reduce16(g, r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15)
+    // }
 }
 
 mod scalar {
@@ -183,86 +454,48 @@ use vector::*;
 
 #[inline]
 #[no_mangle]
-extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: simd16<u8>, b: simd16<u8>) -> simd16<u8> {
+extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: __m128i, b: __m128i) -> __m128i {
     lift16_vv_v(scalar::cmpeq_u8, a, b)
 }
 
 #[inline]
 #[no_mangle]
-extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: simd8<u16>, b: simd8<u16>) -> simd8<u16> {
+extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: __m128i, b: __m128i) -> __m128i {
     lift8_vv_v(scalar::cmpeq_u16, a, b)
 }
 
 #[inline]
 #[no_mangle]
-extern "C" fn llvm_x86_sse2_psrli_w(a: simd8<u16>, imm8: i32) -> simd8<u16> {
+extern "C" fn llvm_x86_sse2_psrli_w(a: __m128i, imm8: i32) -> __m128i {
     lift8_vs_v(scalar::srl_immed_u16_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-extern "C" fn llvm_x86_sse2_pmovmskb_128(a: simd16<u8>) -> i32 {
-    fn op(x: u8) -> i32 {
+extern "C" fn llvm_x86_sse2_pmovmskb_128(a: __m128i) -> i32 {
+    fn f(x: u8) -> i32 {
         ((x >> 7) & 1) as i32
     }
-    let r0  = op(a.0);
-    let r1  = op(a.1);
-    let r2  = op(a.2);
-    let r3  = op(a.3);
-    let r4  = op(a.4);
-    let r5  = op(a.5);
-    let r6  = op(a.6);
-    let r7  = op(a.7);
-    let r8  = op(a.8);
-    let r9  = op(a.9);
-    let r10 = op(a.10);
-    let r11 = op(a.11);
-    let r12 = op(a.12);
-    let r13 = op(a.13);
-    let r14 = op(a.14);
-    let r15 = op(a.15);
+    let a = <u8 as Vector16>::to_vec(a);
+    let r0  = f(<u8 as Vector16>::get0(a));
+    let r1  = f(<u8 as Vector16>::get1(a));
+    let r2  = f(<u8 as Vector16>::get2(a));
+    let r3  = f(<u8 as Vector16>::get3(a));
+    let r4  = f(<u8 as Vector16>::get4(a));
+    let r5  = f(<u8 as Vector16>::get5(a));
+    let r6  = f(<u8 as Vector16>::get6(a));
+    let r7  = f(<u8 as Vector16>::get7(a));
+    let r8  = f(<u8 as Vector16>::get8(a));
+    let r9  = f(<u8 as Vector16>::get9(a));
+    let r10 = f(<u8 as Vector16>::get10(a));
+    let r11 = f(<u8 as Vector16>::get11(a));
+    let r12 = f(<u8 as Vector16>::get12(a));
+    let r13 = f(<u8 as Vector16>::get13(a));
+    let r14 = f(<u8 as Vector16>::get14(a));
+    let r15 = f(<u8 as Vector16>::get15(a));
     let r = (r0  << 0)  | (r1  << 1)  | (r2  << 2)  | (r3  << 3)
           | (r4  << 4)  | (r5  << 5)  | (r6  << 6)  | (r7  << 7)
           | (r8  << 8)  | (r9  << 9)  | (r10 << 10) | (r11 << 11)
           | (r12 << 12) | (r13 << 13) | (r14 << 14) | (r15 << 15);
     r
-}
-
-/// The above operations use structured types that reflect the underlying
-/// operations but they do not match the types of the official Intel
-/// intrinsics.
-/// This module implements the official operations.
-///
-/// Since these versions are designed for use with MIR, we don't
-/// faff around with the extern "C" annotations used to generate usable LLVM
-mod with_intel_official_types {
-    #[derive(Copy, Clone, Debug)]
-    #[allow(non_camel_case_types)]
-    #[repr(simd)]
-    pub struct __m128i(i64, i64);
-
-    fn llvm_x86_sse2_pcmpeqb_epi8(a: __m128i, b: __m128i) -> __m128i {
-        let a = unsafe { std::mem::transmute::<__m128i, super::simd16<u8>>(a) };
-        let b = unsafe { std::mem::transmute::<__m128i, super::simd16<u8>>(b) };
-        let r = super::llvm_x86_sse2_pcmpeqb_epi8(a, b);
-        unsafe { std::mem::transmute::<super::simd16<u8>, __m128i>(r) }
-    }
-
-    fn llvm_x86_sse2_pcmpeqb_epi16(a: __m128i, b: __m128i) -> __m128i {
-        let a = unsafe { std::mem::transmute::<__m128i, super::simd8<u16>>(a) };
-        let b = unsafe { std::mem::transmute::<__m128i, super::simd8<u16>>(b) };
-        let r = super::llvm_x86_sse2_pcmpeqw_epi16(a, b);
-        unsafe { std::mem::transmute::<super::simd8<u16>, __m128i>(r) }
-    }
-
-    fn llvm_x86_sse2_psrli_w(a: __m128i, imm8: i32) -> __m128i {
-        let a = unsafe { std::mem::transmute::<__m128i, super::simd8<u16>>(a) };
-        let r = super::llvm_x86_sse2_psrli_w(a, imm8);
-        unsafe { std::mem::transmute::<super::simd8<u16>, __m128i>(r) }
-    }
-
-    fn llvm_x86_sse2_pmovmskb_128(a: __m128i) -> i32 {
-        let a = unsafe { std::mem::transmute::<__m128i, super::simd16<u8>>(a) };
-        super::llvm_x86_sse2_pmovmskb_128(a)
-    }
 }
