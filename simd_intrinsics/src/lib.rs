@@ -1511,3 +1511,136 @@ pub unsafe fn _mm_srli_si128(a: u128, imm8: i32) -> u128 {
     let imm8 = if imm8 > 15 { 16 } else { imm8 };
     a >> (8 * imm8)
 }
+
+// For every vector operation, there is a choice of saying that
+// it returns a type like __m128i (Intel's name) or of
+// giving a more informative/structured type like u32x4 indicating that
+// it returns 4 32-bit values.
+//
+// For LLVM purposes, we _must_ use the structured types.
+// For Miri purposes, we probably need to use the Intel types.
+//
+// This module provides the same set of intrinsics as above but
+// uses the Intel types instead of the structured types.
+// They are all implemented with a simple wrapper that converts
+// argument types, calls the LLVM version and converts result types.
+mod for_miri {
+    pub use super::vector::{__m128i, __m256i};
+
+    pub unsafe fn llvm_x86_sse2_pcmpeqb_epi8(a: __m128i, b: __m128i) -> __m128i {
+        super::llvm_x86_sse2_pcmpeqb_epi8(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn llvm_x86_sse2_pcmpeqw_epi16(a: __m128i, b: __m128i) -> __m128i {
+        super::llvm_x86_sse2_pcmpeqw_epi16(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn llvm_x86_sse2_psrli_b(a: __m128i, imm8: i32) -> __m128i {
+        super::llvm_x86_sse2_psrli_b(a.into(), imm8).into()
+    }
+
+    pub unsafe fn llvm_x86_sse2_psrli_w(a: __m128i, imm8: i32) -> __m128i {
+        super::llvm_x86_sse2_psrli_w(a.into(), imm8).into()
+    }
+
+    pub unsafe fn llvm_x86_sse2_psrli_d(a: __m128i, imm8: i32) -> __m128i {
+        super::llvm_x86_sse2_psrli_d(a.into(), imm8).into()
+    }
+
+    pub unsafe fn llvm_x86_sse2_psrli_q(a: __m128i, imm8: i32) -> __m128i {
+        super::llvm_x86_sse2_psrli_q(a.into(), imm8).into()
+    }
+
+    pub unsafe fn llvm_x86_avx2_psrli_b(a: __m256i, imm8: i32) -> __m256i {
+        super::llvm_x86_avx2_psrli_b(a.into(), imm8).into()
+    }
+
+    pub unsafe fn llvm_x86_avx2_psrli_w(a: __m256i, imm8: i32) -> __m256i {
+        super::llvm_x86_avx2_psrli_w(a.into(), imm8).into()
+    }
+
+    pub unsafe fn llvm_x86_avx2_psrli_d(a: __m256i, imm8: i32) -> __m256i {
+        super::llvm_x86_avx2_psrli_d(a.into(), imm8).into()
+    }
+
+    pub unsafe fn llvm_x86_avx2_psrli_q(a: __m256i, imm8: i32) -> __m256i {
+        super::llvm_x86_avx2_psrli_q(a.into(), imm8).into()
+    }
+
+    pub unsafe fn llvm_x86_sse2_pmovmskb_128(a: __m128i) -> i32 {
+        super::llvm_x86_sse2_pmovmskb_128(a.into()).into()
+    }
+
+    pub unsafe fn _mm_and_si128(a: __m128i, b: __m128i) -> __m128i {
+        super::_mm_and_si128(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm256_and_si256(a: __m256i, b: __m256i) -> __m256i {
+        super::_mm256_and_si256(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm_andnot_si128(a: __m128i, b: __m128i) -> __m128i {
+        super::_mm_andnot_si128(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm256_andnot_si256(a: __m256i, b: __m256i) -> __m256i {
+        super::_mm256_andnot_si256(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm_or_si128(a: __m128i, b: __m128i) -> __m128i {
+        super::_mm_or_si128(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm256_or_si256(a: __m256i, b: __m256i) -> __m256i {
+        super::_mm256_or_si256(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm_xor_si128(a: __m128i, b: __m128i) -> __m128i {
+        super::_mm_xor_si128(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm256_xor_si256(a: __m256i, b: __m256i) -> __m256i {
+        super::_mm256_xor_si256(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm_set1_epi8(a: i8) -> __m128i {
+        super::_mm_set1_epi8(a.into()).into()
+    }
+
+    pub unsafe fn _mm256_set1_epi8(a: i8) -> __m256i {
+        super::_mm256_set1_epi8(a.into()).into()
+    }
+
+    pub unsafe fn llvm_x86_ssse3_pshuf_b_128(a: __m128i, b: __m128i) -> __m128i {
+        super::llvm_x86_ssse3_pshuf_b_128(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn llvm_x86_avx2_pshuf_b(a: __m256i, b: __m256i) -> __m256i {
+        super::llvm_x86_avx2_pshuf_b(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn llvm_x86_ssse3_pshuf_w_128(a: __m128i, b: __m128i) -> __m128i {
+        super::llvm_x86_ssse3_pshuf_w_128(a.into(), b.into()).into()
+    }
+
+    pub unsafe fn _mm_loadu_si128(mem_addr: *const __m128i) -> __m128i {
+        super::_mm_loadu_si128(mem_addr as *const super::u8x16).into()
+    }
+
+    pub unsafe fn _mm256_loadu_si256(mem_addr: *const __m256i) -> __m256i {
+        super::_mm256_loadu_si256(mem_addr as *const super::u8x32).into()
+    }
+
+    pub unsafe fn _mm_storeu_si128(mem_addr: *mut __m128i, a: __m128i) {
+        super::_mm_storeu_si128(mem_addr as *mut super::u8x16, a.into()).into()
+    }
+
+    pub unsafe fn _mm_storeu_si256(mem_addr: *mut __m256i, a: __m256i) {
+        super::_mm_storeu_si256(mem_addr as *mut super::u8x32, a.into()).into()
+    }
+
+    pub unsafe fn _mm_cvtsi128_si32(a: __m128i) -> i32 {
+        super::_mm_cvtsi128_si32(a.into()).into()
+    }
+
+}
