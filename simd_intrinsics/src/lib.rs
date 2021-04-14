@@ -780,80 +780,69 @@ mod vector {
 
 
     // lift a binary operation over vector and scalar
-    pub fn lift2_vs_v<F, A, B, R>(f: F, a: A::Machine, b: B) -> R::Machine
+    pub fn lift2_vs_v<F, A, B, R>(f: F, a: A::Vec, b: B) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector2,
         B: Copy,
         R: Vector2,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a), b);
         let r1 = f(A::get1(a), b);
-        let r = R::new(r0, r1);
-        R::from_vec(r)
+        R::new(r0, r1)
     }
 
     // lift a binary operation over two vectors
-    pub fn lift2_vv_v<F, A, B, R>(f: F, a: A::Machine, b: B::Machine) -> R::Machine
+    pub fn lift2_vv_v<F, A, B, R>(f: F, a: A::Vec, b: B::Vec) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector2,
         B: Vector2,
         R: Vector2,
     {
-        let a = A::to_vec(a);
-        let b = B::to_vec(b);
         let r0 = f(A::get0(a), B::get0(b));
         let r1 = f(A::get1(a), B::get1(b));
-        let r = R::new(r0, r1);
-        R::from_vec(r)
+        R::new(r0, r1)
     }
 
     // lift a binary operation over vector and scalar
-    pub fn lift4_vs_v<F, A, B, R>(f: F, a: A::Machine, b: B) -> R::Machine
+    pub fn lift4_vs_v<F, A, B, R>(f: F, a: A::Vec, b: B) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector4,
         B: Copy,
         R: Vector4,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a), b);
         let r1 = f(A::get1(a), b);
         let r2 = f(A::get2(a), b);
         let r3 = f(A::get3(a), b);
-        let r = R::new(r0, r1, r2, r3);
-        R::from_vec(r)
+        R::new(r0, r1, r2, r3)
     }
 
     // lift a binary operation over two vectors
-    pub fn lift4_vv_v<F, A, B, R>(f: F, a: A::Machine, b: B::Machine) -> R::Machine
+    pub fn lift4_vv_v<F, A, B, R>(f: F, a: A::Vec, b: B::Vec) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector4,
         B: Vector4,
         R: Vector4,
     {
-        let a = A::to_vec(a);
-        let b = B::to_vec(b);
         let r0 = f(A::get0(a), B::get0(b));
         let r1 = f(A::get1(a), B::get1(b));
         let r2 = f(A::get2(a), B::get2(b));
         let r3 = f(A::get3(a), B::get3(b));
-        let r = R::new(r0, r1, r2, r3);
-        R::from_vec(r)
+        R::new(r0, r1, r2, r3)
     }
 
     // lift a binary operation over vector and scalar
-    pub fn lift8_vs_v<F, A, B, R>(f: F, a: A::Machine, b: B) -> R::Machine
+    pub fn lift8_vs_v<F, A, B, R>(f: F, a: A::Vec, b: B) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector8,
         B: Copy,
         R: Vector8,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a), b);
         let r1 = f(A::get1(a), b);
         let r2 = f(A::get2(a), b);
@@ -862,20 +851,17 @@ mod vector {
         let r5 = f(A::get5(a), b);
         let r6 = f(A::get6(a), b);
         let r7 = f(A::get7(a), b);
-        let r = R::new(r0, r1, r2, r3, r4, r5, r6, r7);
-        R::from_vec(r)
+        R::new(r0, r1, r2, r3, r4, r5, r6, r7)
     }
 
     // lift a binary operation over two vectors
-    pub fn lift8_vv_v<F, A, B, R>(f: F, a: A::Machine, b: B::Machine) -> R::Machine
+    pub fn lift8_vv_v<F, A, B, R>(f: F, a: A::Vec, b: B::Vec) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector8,
         B: Vector8,
         R: Vector8,
     {
-        let a = A::to_vec(a);
-        let b = B::to_vec(b);
         let r0 = f(A::get0(a), B::get0(b));
         let r1 = f(A::get1(a), B::get1(b));
         let r2 = f(A::get2(a), B::get2(b));
@@ -884,45 +870,28 @@ mod vector {
         let r5 = f(A::get5(a), B::get5(b));
         let r6 = f(A::get6(a), B::get6(b));
         let r7 = f(A::get7(a), B::get7(b));
-        let r = R::new(r0, r1, r2, r3, r4, r5, r6, r7);
-        R::from_vec(r)
+        R::new(r0, r1, r2, r3, r4, r5, r6, r7)
     }
 
     // lift a scalar to a vector
-    pub fn lift16_s_v<R>(a: R) -> R::Machine
+    pub fn lift16_s_v<R>(a: R) -> R::Vec
     where
         R: Vector16,
     {
-        let r = R::new(
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-        );
-        R::from_vec(r)
+        R::new(
+            a, a, a, a, a, a, a, a,
+            a, a, a, a, a, a, a, a,
+        )
     }
 
     // lift a binary operation over vector and scalar
-    pub fn lift16_vs_v<F, A, B, R>(f: F, a: A::Machine, b: B) -> R::Machine
+    pub fn lift16_vs_v<F, A, B, R>(f: F, a: A::Vec, b: B) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector16,
         B: Copy,
         R: Vector16,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a), b);
         let r1 = f(A::get1(a), b);
         let r2 = f(A::get2(a), b);
@@ -939,22 +908,19 @@ mod vector {
         let r13 = f(A::get13(a), b);
         let r14 = f(A::get14(a), b);
         let r15 = f(A::get15(a), b);
-        let r = R::new(
+        R::new(
             r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
-        );
-        R::from_vec(r)
+        )
     }
 
     // lift a binary operation over two vectors
-    pub fn lift16_vv_v<F, A, B, R>(f: F, a: A::Machine, b: B::Machine) -> R::Machine
+    pub fn lift16_vv_v<F, A, B, R>(f: F, a: A::Vec, b: B::Vec) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector16,
         B: Vector16,
         R: Vector16,
     {
-        let a = A::to_vec(a);
-        let b = B::to_vec(b);
         let r0 = f(A::get0(a), B::get0(b));
         let r1 = f(A::get1(a), B::get1(b));
         let r2 = f(A::get2(a), B::get2(b));
@@ -971,63 +937,29 @@ mod vector {
         let r13 = f(A::get13(a), B::get13(b));
         let r14 = f(A::get14(a), B::get14(b));
         let r15 = f(A::get15(a), B::get15(b));
-        let r = R::new(
-            r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15,
-        );
-        R::from_vec(r)
+        R::new(r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15)
     }
 
     // lift a scalar to a vector
-    pub fn lift32_s_v<R>(a: R) -> R::Machine
+    pub fn lift32_s_v<R>(a: R) -> R::Vec
     where
         R: Vector32,
     {
-        let r = R::new(
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-            a,
-        );
-        R::from_vec(r)
+        R::new(
+            a, a, a, a, a, a, a, a,
+            a, a, a, a, a, a, a, a,
+            a, a, a, a, a, a, a, a,
+            a, a, a, a, a, a, a, a)
     }
 
     // lift a binary operation over vector and scalar
-    pub fn lift32_vs_v<F, A, B, R>(f: F, a: A::Machine, b: B) -> R::Machine
+    pub fn lift32_vs_v<F, A, B, R>(f: F, a: A::Vec, b: B) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector32,
         B: Copy,
         R: Vector32,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a), b);
         let r1 = f(A::get1(a), b);
         let r2 = f(A::get2(a), b);
@@ -1060,23 +992,20 @@ mod vector {
         let r29 = f(A::get29(a), b);
         let r30 = f(A::get30(a), b);
         let r31 = f(A::get31(a), b);
-        let r = R::new(
+        R::new(
             r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18,
             r19, r20, r21, r22, r23, r24, r25, r26, r27, r28, r29, r30, r31,
-        );
-        R::from_vec(r)
+        )
     }
 
     // lift a binary operation over two vectors
-    pub fn lift32_vv_v<F, A, B, R>(f: F, a: A::Machine, b: B::Machine) -> R::Machine
+    pub fn lift32_vv_v<F, A, B, R>(f: F, a: A::Vec, b: B::Vec) -> R::Vec
     where
         F: Fn(A, B) -> R,
         A: Vector32,
         B: Vector32,
         R: Vector32,
     {
-        let a = A::to_vec(a);
-        let b = B::to_vec(b);
         let r0 = f(A::get0(a), B::get0(b));
         let r1 = f(A::get1(a), B::get1(b));
         let r2 = f(A::get2(a), B::get2(b));
@@ -1109,11 +1038,10 @@ mod vector {
         let r29 = f(A::get29(a), B::get29(b));
         let r30 = f(A::get30(a), B::get30(b));
         let r31 = f(A::get31(a), B::get31(b));
-        let r = R::new(
+        R::new(
             r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18,
             r19, r20, r21, r22, r23, r24, r25, r26, r27, r28, r29, r30, r31,
-        );
-        R::from_vec(r)
+        )
     }
 
     // create a function $f to reduce an array of length $n
@@ -1139,28 +1067,26 @@ mod vector {
     reducer!(32, reduce32);
 
     // lift a unary operation over a vector and reduce
-    pub fn lift2_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+    pub fn lift2_v_s<F, G, A, R>(f: F, g: G, a: A::Vec) -> R
     where
         F: Fn(A) -> R,
         G: Fn(usize, R, R) -> R,
         A: Vector4,
         R: Copy,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a));
         let r1 = f(A::get1(a));
         reduce2(g, [r0, r1])
     }
 
     // lift a unary operation over a vector and reduce
-    pub fn lift4_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+    pub fn lift4_v_s<F, G, A, R>(f: F, g: G, a: A::Vec) -> R
     where
         F: Fn(A) -> R,
         G: Fn(usize, R, R) -> R,
         A: Vector4,
         R: Copy,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a));
         let r1 = f(A::get1(a));
         let r2 = f(A::get2(a));
@@ -1169,14 +1095,13 @@ mod vector {
     }
 
     // lift a unary operation over a vector and reduce
-    pub fn lift8_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+    pub fn lift8_v_s<F, G, A, R>(f: F, g: G, a: A::Vec) -> R
     where
         F: Fn(A) -> R,
         G: Fn(usize, R, R) -> R,
         A: Vector8,
         R: Copy,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a));
         let r1 = f(A::get1(a));
         let r2 = f(A::get2(a));
@@ -1189,14 +1114,13 @@ mod vector {
     }
 
     // lift a unary operation over a vector and reduce
-    pub fn lift16_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+    pub fn lift16_v_s<F, G, A, R>(f: F, g: G, a: A::Vec) -> R
     where
         F: Fn(A) -> R,
         G: Fn(usize, R, R) -> R,
         A: Vector16,
         R: Copy,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a));
         let r1 = f(A::get1(a));
         let r2 = f(A::get2(a));
@@ -1222,14 +1146,13 @@ mod vector {
     }
 
     // lift a unary operation over a vector and reduce
-    pub fn lift32_v_s<F, G, A, R>(f: F, g: G, a: A::Machine) -> R
+    pub fn lift32_v_s<F, G, A, R>(f: F, g: G, a: A::Vec) -> R
     where
         F: Fn(A) -> R,
         G: Fn(usize, R, R) -> R,
         A: Vector32,
         R: Copy,
     {
-        let a = A::to_vec(a);
         let r0 = f(A::get0(a));
         let r1 = f(A::get1(a));
         let r2 = f(A::get2(a));
@@ -1354,137 +1277,137 @@ use vector::*;
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: __m128i, b: __m128i) -> __m128i {
+unsafe extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: u8x16, b: u8x16) -> u8x16 {
     lift16_vv_v(scalar::cmpeq_u8, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: __m128i, b: __m128i) -> __m128i {
+unsafe extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: u16x8, b: u16x8) -> u16x8 {
     lift8_vv_v(scalar::cmpeq_u16, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_psrli_b(a: __m128i, imm8: i32) -> __m128i {
+unsafe extern "C" fn llvm_x86_sse2_psrli_b(a: u8x16, imm8: i32) -> u8x16 {
     lift16_vs_v(scalar::srl_immed_u8_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_psrli_w(a: __m128i, imm8: i32) -> __m128i {
+unsafe extern "C" fn llvm_x86_sse2_psrli_w(a: u16x8, imm8: i32) -> u16x8 {
     lift8_vs_v(scalar::srl_immed_u16_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_psrli_d(a: __m128i, imm8: i32) -> __m128i {
+unsafe extern "C" fn llvm_x86_sse2_psrli_d(a: u32x4, imm8: i32) -> u32x4 {
     lift4_vs_v(scalar::srl_immed_u32_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_psrli_q(a: __m128i, imm8: i32) -> __m128i {
+unsafe extern "C" fn llvm_x86_sse2_psrli_q(a: u64x2, imm8: i32) -> u64x2 {
     lift2_vs_v(scalar::srl_immed_u64_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_avx2_psrli_b(a: __m256i, imm8: i32) -> __m256i {
+unsafe extern "C" fn llvm_x86_avx2_psrli_b(a: u8x32, imm8: i32) -> u8x32 {
     lift32_vs_v(scalar::srl_immed_u8_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_avx2_psrli_w(a: __m256i, imm8: i32) -> __m256i {
+unsafe extern "C" fn llvm_x86_avx2_psrli_w(a: u16x16, imm8: i32) -> u16x16 {
     lift16_vs_v(scalar::srl_immed_u16_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_avx2_psrli_d(a: __m256i, imm8: i32) -> __m256i {
+unsafe extern "C" fn llvm_x86_avx2_psrli_d(a: u32x8, imm8: i32) -> u32x8 {
     lift8_vs_v(scalar::srl_immed_u32_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_avx2_psrli_q(a: __m256i, imm8: i32) -> __m256i {
+unsafe extern "C" fn llvm_x86_avx2_psrli_q(a: u64x4, imm8: i32) -> u64x4 {
     lift4_vs_v(scalar::srl_immed_u64_u8, a, imm8 as u8)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_pmovmskb_128(a: __m128i) -> i32 {
+unsafe extern "C" fn llvm_x86_sse2_pmovmskb_128(a: u8x16) -> i32 {
     lift16_v_s(scalar::sign_u8_i32, |i, x, y| x | (y << i), a)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_and_si128(a: __m128i, b: __m128i) -> __m128i {
+unsafe extern "C" fn _mm_and_si128(a: u64x2, b: u64x2) -> u64x2 {
     lift2_vv_v(scalar::and64, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm256_and_si256(a: __m256i, b: __m256i) -> __m256i {
+unsafe extern "C" fn _mm256_and_si256(a: u64x4, b: u64x4) -> u64x4 {
     lift4_vv_v(scalar::and64, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_andnot_si128(a: __m128i, b: __m128i) -> __m128i {
+unsafe extern "C" fn _mm_andnot_si128(a: u64x2, b: u64x2) -> u64x2 {
     lift2_vv_v(scalar::andnot64, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm256_andnot_si256(a: __m256i, b: __m256i) -> __m256i {
+unsafe extern "C" fn _mm256_andnot_si256(a: u64x4, b: u64x4) -> u64x4 {
     lift4_vv_v(scalar::andnot64, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_or_si128(a: __m128i, b: __m128i) -> __m128i {
+unsafe extern "C" fn _mm_or_si128(a: u64x2, b: u64x2) -> u64x2 {
     lift2_vv_v(scalar::or64, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm256_or_si256(a: __m256i, b: __m256i) -> __m256i {
+unsafe extern "C" fn _mm256_or_si256(a: u64x4, b: u64x4) -> u64x4 {
     lift4_vv_v(scalar::or64, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_xor_si128(a: __m128i, b: __m128i) -> __m128i {
+unsafe extern "C" fn _mm_xor_si128(a: u64x2, b: u64x2) -> u64x2 {
     lift2_vv_v(scalar::xor64, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm256_xor_si256(a: __m256i, b: __m256i) -> __m256i {
+unsafe extern "C" fn _mm256_xor_si256(a: u64x4, b: u64x4) -> u64x4 {
     lift4_vv_v(scalar::xor64, a, b)
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_set1_epi8(a: i8) -> __m128i {
+unsafe extern "C" fn _mm_set1_epi8(a: i8) -> u8x16 {
     lift16_s_v(a as u8)
 }
 
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm256_set1_epi8(a: i8) -> __m256i {
+unsafe extern "C" fn _mm256_set1_epi8(a: i8) -> u8x32 {
     lift32_s_v(a as u8)
 }
 
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_ssse3_pshuf_b_128(a: __m128i, b: __m128i) -> __m128i {
+unsafe extern "C" fn llvm_x86_ssse3_pshuf_b_128(a: u8x16, b: u8x16) -> u8x16 {
     union U {
-        intel: __m128i,
+        intel: u8x16,
         arr: [u8; 16],
     }
     let a = unsafe { U { intel: a }.arr };
@@ -1499,9 +1422,26 @@ unsafe extern "C" fn llvm_x86_ssse3_pshuf_b_128(a: __m128i, b: __m128i) -> __m12
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_ssse3_pshuf_w_128(a: __m128i, b: __m128i) -> __m128i {
+unsafe extern "C" fn llvm_x86_avx2_pshuf_b(a: u8x32, b: u8x32) -> u8x32 {
     union U {
-        intel: __m128i,
+        intel: u8x32,
+        arr: [u8; 32],
+    }
+    let a = unsafe { U { intel: a }.arr };
+    let b = unsafe { U { intel: b }.arr };
+    let mut r = [0; 32];
+    for i in 0..32 {
+        let j = b[i] & 31;
+        r[i] = a[j as usize];
+    }
+    unsafe { U { arr: r }.intel }
+}
+
+#[inline]
+#[no_mangle]
+unsafe extern "C" fn llvm_x86_ssse3_pshuf_w_128(a: u16x8, b: u16x8) -> u16x8 {
+    union U {
+        intel: u16x8,
         arr: [u16; 8],
     }
     let a = unsafe { U { intel: a }.arr };
@@ -1516,61 +1456,58 @@ unsafe extern "C" fn llvm_x86_ssse3_pshuf_w_128(a: __m128i, b: __m128i) -> __m12
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_loadu_si128(mem_addr: *const __m128i) -> __m128i {
-    let mut dst: __m128i = _mm_set1_epi8(0);
+unsafe extern "C" fn _mm_loadu_si128(mem_addr: *const u8x16) -> u8x16 {
+    let mut dst = _mm_set1_epi8(0);
     std::ptr::copy_nonoverlapping(
         mem_addr as *const u8,
-        &mut dst as *mut __m128i as *mut u8,
-        std::mem::size_of::<__m128i>(),
+        &mut dst as *mut u8x16 as *mut u8,
+        std::mem::size_of::<u8x16>(),
     );
     dst
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm256_loadu_si256(mem_addr: *const __m256i) -> __m256i {
-    let mut dst: __m256i = _mm256_set1_epi8(0);
+unsafe extern "C" fn _mm256_loadu_si256(mem_addr: *const u8x32) -> u8x32 {
+    let mut dst = _mm256_set1_epi8(0);
     std::ptr::copy_nonoverlapping(
         mem_addr as *const u8,
-        &mut dst as *mut __m256i as *mut u8,
-        std::mem::size_of::<__m256i>(),
+        &mut dst as *mut u8x32 as *mut u8,
+        std::mem::size_of::<u8x32>(),
     );
     dst
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_storeu_si128(mem_addr: *mut __m128i, a: __m128i) {
+unsafe extern "C" fn _mm_storeu_si128(mem_addr: *mut u8x16, a: u8x16) {
     std::ptr::copy_nonoverlapping(
-        &a as *const __m128i as *const u8,
+        &a as *const u8x16 as *const u8,
         mem_addr as *mut u8,
-        std::mem::size_of::<__m128i>(),
+        std::mem::size_of::<u8x16>(),
     )
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_storeu_si256(mem_addr: *mut __m256i, a: __m256i) {
+unsafe extern "C" fn _mm_storeu_si256(mem_addr: *mut u8x32, a: u8x32) {
     std::ptr::copy_nonoverlapping(
-        &a as *const __m256i as *const u8,
+        &a as *const u8x32 as *const u8,
         mem_addr as *mut u8,
-        std::mem::size_of::<__m256i>(),
+        std::mem::size_of::<u8x32>(),
     )
 }
 
 #[inline]
 #[no_mangle]
-unsafe extern "C" fn _mm_cvtsi128_si32(a: __m128i) -> i32 {
-    let a: u32x4 = a.into();
+unsafe extern "C" fn _mm_cvtsi128_si32(a: u32x4) -> i32 {
     a.0 as i32
 }
 
 #[inline]
 #[no_mangle]
-pub unsafe fn _mm_srli_si128(a: __m128i, imm8: i32) -> __m128i {
+pub unsafe fn _mm_srli_si128(a: u128, imm8: i32) -> u128 {
     let imm8: u8 = imm8 as u8;
     let imm8 = if imm8 > 15 { 16 } else { imm8 };
-    let a = to_u128(a);
-    let r = a >> (8 * imm8);
-    from_u128(r)
+    a >> (8 * imm8)
 }
