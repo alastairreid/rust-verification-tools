@@ -1230,6 +1230,22 @@ mod scalar {
         }
     }
 
+    pub fn cmpgt_u8(x: u8, y: u8) -> u8 {
+        if x == y {
+            0xff
+        } else {
+            0x0
+        }
+    }
+
+    pub fn cmpgt_u16(x: u16, y: u16) -> u16 {
+        if x == y {
+            0xffff
+        } else {
+            0x0
+        }
+    }
+
     /// Logical shift right by 8-bit immediate (0 if shift distance too large)
     pub fn srl_immed_u8_u8(x: u8, imm8: u8) -> u8 {
         if imm8 > 7 {
@@ -1285,6 +1301,18 @@ unsafe extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: u8x16, b: u8x16) -> u8x16 {
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: u16x8, b: u16x8) -> u16x8 {
     lift8_vv_v(scalar::cmpeq_u16, a, b)
+}
+
+#[inline]
+#[no_mangle]
+unsafe extern "C" fn llvm_x86_sse2_pcmpgtb_epi8(a: u8x16, b: u8x16) -> u8x16 {
+    lift16_vv_v(scalar::cmpgt_u8, a, b)
+}
+
+#[inline]
+#[no_mangle]
+unsafe extern "C" fn llvm_x86_sse2_pcmpgtw_epi16(a: u16x8, b: u16x8) -> u16x8 {
+    lift8_vv_v(scalar::cmpgt_u16, a, b)
 }
 
 #[inline]
@@ -1609,6 +1637,14 @@ mod for_miri {
 
     pub unsafe fn _mm256_set1_epi8(a: i8) -> __m256i {
         super::_mm256_set1_epi8(a.into()).into()
+    }
+
+    pub unsafe fn _mm_setzero_epi8() -> __m128i {
+        super::_mm_set1_epi8(0).into()
+    }
+
+    pub unsafe fn _mm256_setzero_epi8() -> __m256i {
+        super::_mm256_set1_epi8(0).into()
     }
 
     pub unsafe fn llvm_x86_ssse3_pshuf_b_128(a: __m128i, b: __m128i) -> __m128i {
