@@ -1152,26 +1152,6 @@ mod scalar {
 use vector::*;
 
 #[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: u8x16, b: u8x16) -> u8x16 {
-    lift16_vv_v(scalar::cmpeq_u8, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: u16x8, b: u16x8) -> u16x8 {
-    lift8_vv_v(scalar::cmpeq_u16, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_pcmpgtb_epi8(a: u8x16, b: u8x16) -> u8x16 {
-    lift16_vv_v(scalar::cmpgt_u8, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn llvm_x86_sse2_pcmpgtw_epi16(a: u16x8, b: u16x8) -> u16x8 {
-    lift8_vv_v(scalar::cmpgt_u16, a, b)
-}
-
-#[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_psrli_b(a: u8x16, imm8: i32) -> u8x16 {
     lift16_vs_v(scalar::srl_immed_u8_u8, a, imm8 as u8)
 }
@@ -1217,56 +1197,9 @@ unsafe extern "C" fn llvm_x86_sse2_pmovmskb_128(a: u8x16) -> i32 {
 }
 
 #[no_mangle]
-unsafe extern "C" fn _mm_and_si128(a: u64x2, b: u64x2) -> u64x2 {
-    lift2_vv_v(scalar::and64, a, b)
+unsafe extern "C" fn llvm_x86_avx2_pmovmskb(a: u8x32) -> i32 {
+    lift32_v_s(scalar::sign_u8_i32, |i, x, y| x | (y << i), a)
 }
-
-#[no_mangle]
-unsafe extern "C" fn _mm256_and_si256(a: u64x4, b: u64x4) -> u64x4 {
-    lift4_vv_v(scalar::and64, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm_andnot_si128(a: u64x2, b: u64x2) -> u64x2 {
-    lift2_vv_v(scalar::andnot64, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm256_andnot_si256(a: u64x4, b: u64x4) -> u64x4 {
-    lift4_vv_v(scalar::andnot64, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm_or_si128(a: u64x2, b: u64x2) -> u64x2 {
-    lift2_vv_v(scalar::or64, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm256_or_si256(a: u64x4, b: u64x4) -> u64x4 {
-    lift4_vv_v(scalar::or64, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm_xor_si128(a: u64x2, b: u64x2) -> u64x2 {
-    lift2_vv_v(scalar::xor64, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm256_xor_si256(a: u64x4, b: u64x4) -> u64x4 {
-    lift4_vv_v(scalar::xor64, a, b)
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm_set1_epi8(a: i8) -> u8x16 {
-    lift16_s_v(a as u8)
-}
-
-
-#[no_mangle]
-unsafe extern "C" fn _mm256_set1_epi8(a: i8) -> u8x32 {
-    lift32_s_v(a as u8)
-}
-
 
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_ssse3_pshuf_b_128(a: u8x16, b: u8x16) -> u8x16 {
@@ -1299,72 +1232,3 @@ unsafe extern "C" fn llvm_x86_avx2_pshuf_b(a: u8x32, b: u8x32) -> u8x32 {
     }
     unsafe { U { arr: r }.intel }
 }
-
-#[no_mangle]
-unsafe extern "C" fn llvm_x86_ssse3_pshuf_w_128(a: u16x8, b: u16x8) -> u16x8 {
-    union U {
-        intel: u16x8,
-        arr: [u16; 8],
-    }
-    let a = unsafe { U { intel: a }.arr };
-    let b = unsafe { U { intel: b }.arr };
-    let mut r = [0; 8];
-    for i in 0..8 {
-        let j = b[i] & 7;
-        r[i] = a[j as usize];
-    }
-    unsafe { U { arr: r }.intel }
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm_loadu_si128(mem_addr: *const u8x16) -> u8x16 {
-    let mut dst = _mm_set1_epi8(0);
-    std::ptr::copy_nonoverlapping(
-        mem_addr as *const u8,
-        &mut dst as *mut u8x16 as *mut u8,
-        std::mem::size_of::<u8x16>(),
-    );
-    dst
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm256_loadu_si256(mem_addr: *const u8x32) -> u8x32 {
-    let mut dst = _mm256_set1_epi8(0);
-    std::ptr::copy_nonoverlapping(
-        mem_addr as *const u8,
-        &mut dst as *mut u8x32 as *mut u8,
-        std::mem::size_of::<u8x32>(),
-    );
-    dst
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm_storeu_si128(mem_addr: *mut u8x16, a: u8x16) {
-    std::ptr::copy_nonoverlapping(
-        &a as *const u8x16 as *const u8,
-        mem_addr as *mut u8,
-        std::mem::size_of::<u8x16>(),
-    )
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm_storeu_si256(mem_addr: *mut u8x32, a: u8x32) {
-    std::ptr::copy_nonoverlapping(
-        &a as *const u8x32 as *const u8,
-        mem_addr as *mut u8,
-        std::mem::size_of::<u8x32>(),
-    )
-}
-
-#[no_mangle]
-unsafe extern "C" fn _mm_cvtsi128_si32(a: u32x4) -> i32 {
-    a.0 as i32
-}
-
-#[no_mangle]
-pub unsafe fn _mm_srli_si128(a: u128, imm8: i32) -> u128 {
-    let imm8: u8 = imm8 as u8;
-    let imm8 = if imm8 > 15 { 16 } else { imm8 };
-    a >> (8 * imm8)
-}
-
