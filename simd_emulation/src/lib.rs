@@ -1151,147 +1151,123 @@ mod scalar {
 
 use vector::*;
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_pcmpeqb_epi8(a: u8x16, b: u8x16) -> u8x16 {
     lift16_vv_v(scalar::cmpeq_u8, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_pcmpeqw_epi16(a: u16x8, b: u16x8) -> u16x8 {
     lift8_vv_v(scalar::cmpeq_u16, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_pcmpgtb_epi8(a: u8x16, b: u8x16) -> u8x16 {
     lift16_vv_v(scalar::cmpgt_u8, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_pcmpgtw_epi16(a: u16x8, b: u16x8) -> u16x8 {
     lift8_vv_v(scalar::cmpgt_u16, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_psrli_b(a: u8x16, imm8: i32) -> u8x16 {
     lift16_vs_v(scalar::srl_immed_u8_u8, a, imm8 as u8)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_psrli_w(a: u16x8, imm8: i32) -> u16x8 {
     lift8_vs_v(scalar::srl_immed_u16_u8, a, imm8 as u8)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_psrli_d(a: u32x4, imm8: i32) -> u32x4 {
     lift4_vs_v(scalar::srl_immed_u32_u8, a, imm8 as u8)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_psrli_q(a: u64x2, imm8: i32) -> u64x2 {
     lift2_vs_v(scalar::srl_immed_u64_u8, a, imm8 as u8)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_avx2_psrli_b(a: u8x32, imm8: i32) -> u8x32 {
     lift32_vs_v(scalar::srl_immed_u8_u8, a, imm8 as u8)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_avx2_psrli_w(a: u16x16, imm8: i32) -> u16x16 {
     lift16_vs_v(scalar::srl_immed_u16_u8, a, imm8 as u8)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_avx2_psrli_d(a: u32x8, imm8: i32) -> u32x8 {
     lift8_vs_v(scalar::srl_immed_u32_u8, a, imm8 as u8)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_avx2_psrli_q(a: u64x4, imm8: i32) -> u64x4 {
     lift4_vs_v(scalar::srl_immed_u64_u8, a, imm8 as u8)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_sse2_pmovmskb_128(a: u8x16) -> i32 {
     lift16_v_s(scalar::sign_u8_i32, |i, x, y| x | (y << i), a)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_and_si128(a: u64x2, b: u64x2) -> u64x2 {
     lift2_vv_v(scalar::and64, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm256_and_si256(a: u64x4, b: u64x4) -> u64x4 {
     lift4_vv_v(scalar::and64, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_andnot_si128(a: u64x2, b: u64x2) -> u64x2 {
     lift2_vv_v(scalar::andnot64, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm256_andnot_si256(a: u64x4, b: u64x4) -> u64x4 {
     lift4_vv_v(scalar::andnot64, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_or_si128(a: u64x2, b: u64x2) -> u64x2 {
     lift2_vv_v(scalar::or64, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm256_or_si256(a: u64x4, b: u64x4) -> u64x4 {
     lift4_vv_v(scalar::or64, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_xor_si128(a: u64x2, b: u64x2) -> u64x2 {
     lift2_vv_v(scalar::xor64, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm256_xor_si256(a: u64x4, b: u64x4) -> u64x4 {
     lift4_vv_v(scalar::xor64, a, b)
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_set1_epi8(a: i8) -> u8x16 {
     lift16_s_v(a as u8)
 }
 
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm256_set1_epi8(a: i8) -> u8x32 {
     lift32_s_v(a as u8)
 }
 
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_ssse3_pshuf_b_128(a: u8x16, b: u8x16) -> u8x16 {
     union U {
@@ -1308,7 +1284,6 @@ unsafe extern "C" fn llvm_x86_ssse3_pshuf_b_128(a: u8x16, b: u8x16) -> u8x16 {
     unsafe { U { arr: r }.intel }
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_avx2_pshuf_b(a: u8x32, b: u8x32) -> u8x32 {
     union U {
@@ -1325,7 +1300,6 @@ unsafe extern "C" fn llvm_x86_avx2_pshuf_b(a: u8x32, b: u8x32) -> u8x32 {
     unsafe { U { arr: r }.intel }
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn llvm_x86_ssse3_pshuf_w_128(a: u16x8, b: u16x8) -> u16x8 {
     union U {
@@ -1342,7 +1316,6 @@ unsafe extern "C" fn llvm_x86_ssse3_pshuf_w_128(a: u16x8, b: u16x8) -> u16x8 {
     unsafe { U { arr: r }.intel }
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_loadu_si128(mem_addr: *const u8x16) -> u8x16 {
     let mut dst = _mm_set1_epi8(0);
@@ -1354,7 +1327,6 @@ unsafe extern "C" fn _mm_loadu_si128(mem_addr: *const u8x16) -> u8x16 {
     dst
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm256_loadu_si256(mem_addr: *const u8x32) -> u8x32 {
     let mut dst = _mm256_set1_epi8(0);
@@ -1366,7 +1338,6 @@ unsafe extern "C" fn _mm256_loadu_si256(mem_addr: *const u8x32) -> u8x32 {
     dst
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_storeu_si128(mem_addr: *mut u8x16, a: u8x16) {
     std::ptr::copy_nonoverlapping(
@@ -1376,7 +1347,6 @@ unsafe extern "C" fn _mm_storeu_si128(mem_addr: *mut u8x16, a: u8x16) {
     )
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_storeu_si256(mem_addr: *mut u8x32, a: u8x32) {
     std::ptr::copy_nonoverlapping(
@@ -1386,13 +1356,11 @@ unsafe extern "C" fn _mm_storeu_si256(mem_addr: *mut u8x32, a: u8x32) {
     )
 }
 
-#[inline]
 #[no_mangle]
 unsafe extern "C" fn _mm_cvtsi128_si32(a: u32x4) -> i32 {
     a.0 as i32
 }
 
-#[inline]
 #[no_mangle]
 pub unsafe fn _mm_srli_si128(a: u128, imm8: i32) -> u128 {
     let imm8: u8 = imm8 as u8;
