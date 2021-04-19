@@ -38,10 +38,10 @@ mod vector {
         fn get1(x: Self::Vec) -> Self;
 
         /// Convert the machine-dependent type to the portable representation
-        fn to_vec(Self::Machine) -> Self::Vec;
+        fn to_vec(x: Self::Machine) -> Self::Vec;
 
         /// Convert the portable representation to the machine-dependent type
-        fn from_vec(Self::Vec) -> Self::Machine;
+        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Implemented by types that support 4-element vectors
@@ -68,10 +68,10 @@ mod vector {
         fn get3(x: Self::Vec) -> Self;
 
         /// Convert the machine-dependent type to the portable representation
-        fn to_vec(Self::Machine) -> Self::Vec;
+        fn to_vec(x: Self::Machine) -> Self::Vec;
 
         /// Convert the portable representation to the machine-dependent type
-        fn from_vec(Self::Vec) -> Self::Machine;
+        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Implemented by types that support 8-element vectors
@@ -111,10 +111,10 @@ mod vector {
         fn get7(x: Self::Vec) -> Self;
 
         /// Convert the machine-dependent type to the portable representation
-        fn to_vec(Self::Machine) -> Self::Vec;
+        fn to_vec(x: Self::Machine) -> Self::Vec;
 
         /// Convert the portable representation to the machine-dependent type
-        fn from_vec(Self::Vec) -> Self::Machine;
+        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Implemented by types that support 16-element vectors
@@ -170,10 +170,10 @@ mod vector {
         fn get15(x: Self::Vec) -> Self;
 
         /// Convert the machine-dependent type to the portable representation
-        fn to_vec(Self::Machine) -> Self::Vec;
+        fn to_vec(x: Self::Machine) -> Self::Vec;
 
         /// Convert the portable representation to the machine-dependent type
-        fn from_vec(Self::Vec) -> Self::Machine;
+        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Implemented by types that support 32-element vectors
@@ -261,10 +261,10 @@ mod vector {
         fn get31(x: Self::Vec) -> Self;
 
         /// Convert the machine-dependent type to the portable representation
-        fn to_vec(Self::Machine) -> Self::Vec;
+        fn to_vec(x: Self::Machine) -> Self::Vec;
 
         /// Convert the portable representation to the machine-dependent type
-        fn from_vec(Self::Vec) -> Self::Machine;
+        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Define From implementations between portable and machine types

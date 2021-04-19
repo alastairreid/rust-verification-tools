@@ -12,6 +12,7 @@ default: simd_emulation.bc
 RUSTC = rustc
 RSFLAGS = --emit=llvm-bc --crate-type=lib -O -Ctarget-feature=+sse2
 RSFLAGS += --emit=mir
+RSFLAGS += --edition=2018
 
 LINK = llvm-link-10
 
