@@ -14,8 +14,6 @@
 /// using 2nd order functions
 mod vector {
 
-    pub use std::arch::x86_64::{__m128i, __m256i};
-
     /// Implemented by types that support 4-element vectors
     /// Provides methods to construct, destruct and convert vectors to their
     /// native representation.
@@ -27,21 +25,12 @@ mod vector {
         /// Portable type used to represent vectors
         type Vec;
 
-        /// Machine-dependent type used to represent vectors
-        type Machine;
-
         /// Construct a vector from individual elements
         fn new(x0: Self, x1: Self) -> Self::Vec;
 
         /// Extract elements from a vector
         fn get0(x: Self::Vec) -> Self;
         fn get1(x: Self::Vec) -> Self;
-
-        /// Convert the machine-dependent type to the portable representation
-        fn to_vec(x: Self::Machine) -> Self::Vec;
-
-        /// Convert the portable representation to the machine-dependent type
-        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Implemented by types that support 4-element vectors
@@ -55,9 +44,6 @@ mod vector {
         /// Portable type used to represent vectors
         type Vec;
 
-        /// Machine-dependent type used to represent vectors
-        type Machine;
-
         /// Construct a vector from individual elements
         fn new(x0: Self, x1: Self, x2: Self, x3: Self) -> Self::Vec;
 
@@ -66,12 +52,6 @@ mod vector {
         fn get1(x: Self::Vec) -> Self;
         fn get2(x: Self::Vec) -> Self;
         fn get3(x: Self::Vec) -> Self;
-
-        /// Convert the machine-dependent type to the portable representation
-        fn to_vec(x: Self::Machine) -> Self::Vec;
-
-        /// Convert the portable representation to the machine-dependent type
-        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Implemented by types that support 8-element vectors
@@ -84,9 +64,6 @@ mod vector {
     {
         /// Portable type used to represent vectors
         type Vec;
-
-        /// Machine-dependent type used to represent vectors
-        type Machine;
 
         /// Construct a vector from individual elements
         fn new(
@@ -109,12 +86,6 @@ mod vector {
         fn get5(x: Self::Vec) -> Self;
         fn get6(x: Self::Vec) -> Self;
         fn get7(x: Self::Vec) -> Self;
-
-        /// Convert the machine-dependent type to the portable representation
-        fn to_vec(x: Self::Machine) -> Self::Vec;
-
-        /// Convert the portable representation to the machine-dependent type
-        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Implemented by types that support 16-element vectors
@@ -127,9 +98,6 @@ mod vector {
     {
         /// Portable type used to represent vectors
         type Vec;
-
-        /// Machine-dependent type used to represent vectors
-        type Machine;
 
         /// Construct a vector from individual elements
         fn new(
@@ -168,12 +136,6 @@ mod vector {
         fn get13(x: Self::Vec) -> Self;
         fn get14(x: Self::Vec) -> Self;
         fn get15(x: Self::Vec) -> Self;
-
-        /// Convert the machine-dependent type to the portable representation
-        fn to_vec(x: Self::Machine) -> Self::Vec;
-
-        /// Convert the portable representation to the machine-dependent type
-        fn from_vec(x: Self::Vec) -> Self::Machine;
     }
 
     /// Implemented by types that support 32-element vectors
@@ -186,9 +148,6 @@ mod vector {
     {
         /// Portable type used to represent vectors
         type Vec;
-
-        /// Machine-dependent type used to represent vectors
-        type Machine;
 
         /// Construct a vector from individual elements
         fn new(
@@ -259,53 +218,17 @@ mod vector {
         fn get29(x: Self::Vec) -> Self;
         fn get30(x: Self::Vec) -> Self;
         fn get31(x: Self::Vec) -> Self;
-
-        /// Convert the machine-dependent type to the portable representation
-        fn to_vec(x: Self::Machine) -> Self::Vec;
-
-        /// Convert the portable representation to the machine-dependent type
-        fn from_vec(x: Self::Vec) -> Self::Machine;
-    }
-
-    /// Define From implementations between portable and machine types
-    macro_rules! conversions {
-        ($pty: ty, $mty: ty) => {
-            impl From<$mty> for $pty {
-                fn from(x: $mty) -> Self {
-                    union U {
-                        intel: $mty,
-                        sane: $pty,
-                    }
-                    let u = U { intel: x };
-                    unsafe { u.sane }
-                }
-            }
-
-            impl From<$pty> for $mty {
-                fn from(x: $pty) -> Self {
-                    union U {
-                        intel: $mty,
-                        sane: $pty,
-                    }
-                    let u = U { sane: x };
-                    unsafe { u.intel }
-                }
-            }
-        };
     }
 
     /// Define Vector4 implementation for vectors of $ety and constructor $c
     macro_rules! vector2 {
-        ($ety: ty, $pty: ident, $mty: ty) => {
+        ($ety: ty, $pty: ident) => {
             #[derive(Copy, Clone, Debug)]
             #[allow(non_camel_case_types)]
             #[repr(simd)]
             pub struct $pty(pub $ety, pub $ety);
 
-            conversions!($pty, $mty);
-
             impl Vector2 for $ety {
-                type Machine = $mty;
                 type Vec = $pty;
 
                 fn new(x0: Self, x1: Self) -> Self::Vec {
@@ -318,29 +241,19 @@ mod vector {
                 fn get1(x: Self::Vec) -> Self {
                     x.1
                 }
-
-                fn to_vec(x: Self::Machine) -> Self::Vec {
-                    x.into()
-                }
-                fn from_vec(x: Self::Vec) -> Self::Machine {
-                    x.into()
-                }
             }
         };
     }
 
     /// Define Vector4 implementation for vectors of $ety and constructor $c
     macro_rules! vector4 {
-        ($ety: ty, $pty: ident, $mty: ty) => {
+        ($ety: ty, $pty: ident) => {
             #[derive(Copy, Clone, Debug)]
             #[allow(non_camel_case_types)]
             #[repr(simd)]
             pub struct $pty(pub $ety, pub $ety, pub $ety, pub $ety);
 
-            conversions!($pty, $mty);
-
             impl Vector4 for $ety {
-                type Machine = $mty;
                 type Vec = $pty;
 
                 fn new(x0: Self, x1: Self, x2: Self, x3: Self) -> Self::Vec {
@@ -359,20 +272,13 @@ mod vector {
                 fn get3(x: Self::Vec) -> Self {
                     x.3
                 }
-
-                fn to_vec(x: Self::Machine) -> Self::Vec {
-                    x.into()
-                }
-                fn from_vec(x: Self::Vec) -> Self::Machine {
-                    x.into()
-                }
             }
         };
     }
 
     /// Define Vector8 implementation for vectors of $ety and constructor $c
     macro_rules! vector8 {
-        ($ety: ty, $pty: ident, $mty: ty) => {
+        ($ety: ty, $pty: ident) => {
             #[derive(Copy, Clone, Debug)]
             #[allow(non_camel_case_types)]
             #[repr(simd)]
@@ -387,10 +293,7 @@ mod vector {
                 pub $ety,
             );
 
-            conversions!($pty, $mty);
-
             impl Vector8 for $ety {
-                type Machine = $mty;
                 type Vec = $pty;
 
                 fn new(
@@ -430,20 +333,13 @@ mod vector {
                 fn get7(x: Self::Vec) -> Self {
                     x.7
                 }
-
-                fn to_vec(x: Self::Machine) -> Self::Vec {
-                    x.into()
-                }
-                fn from_vec(x: Self::Vec) -> Self::Machine {
-                    x.into()
-                }
             }
         };
     }
 
     /// Define Vector16 implementation for vectors of $ety and constructor $c
     macro_rules! vector16 {
-        ($ety: ty, $pty: ident, $mty: ty) => {
+        ($ety: ty, $pty: ident) => {
             #[derive(Copy, Clone, Debug)]
             #[allow(non_camel_case_types)]
             #[repr(simd)]
@@ -466,10 +362,7 @@ mod vector {
                 pub $ety,
             );
 
-            conversions!($pty, $mty);
-
             impl Vector16 for $ety {
-                type Machine = $mty;
                 type Vec = $pty;
 
                 fn new(
@@ -543,20 +436,13 @@ mod vector {
                 fn get15(x: Self::Vec) -> Self {
                     x.15
                 }
-
-                fn to_vec(x: Self::Machine) -> Self::Vec {
-                    x.into()
-                }
-                fn from_vec(x: Self::Vec) -> Self::Machine {
-                    x.into()
-                }
             }
         };
     }
 
     /// Define Vector32 implementation for vectors of $ety and constructor $c
     macro_rules! vector32 {
-        ($ety: ty, $pty: ident, $mty: ty) => {
+        ($ety: ty, $pty: ident) => {
             #[derive(Copy, Clone, Debug)]
             #[allow(non_camel_case_types)]
             #[repr(simd)]
@@ -595,10 +481,7 @@ mod vector {
                 pub $ety,
             );
 
-            conversions!($pty, $mty);
-
             impl Vector32 for $ety {
-                type Machine = $mty;
                 type Vec = $pty;
 
                 fn new(
@@ -737,46 +620,23 @@ mod vector {
                 fn get31(x: Self::Vec) -> Self {
                     x.31
                 }
-
-                fn to_vec(x: Self::Machine) -> Self::Vec {
-                    x.into()
-                }
-                fn from_vec(x: Self::Vec) -> Self::Machine {
-                    x.into()
-                }
             }
         };
     }
 
-    vector32!(u8, u8x32, __m256i);
+    vector32!(u8, u8x32);
 
-    vector16!(u8, u8x16, __m128i);
-    vector16!(u16, u16x16, __m256i);
+    vector16!(u8, u8x16);
+    vector16!(u16, u16x16);
 
-    vector8!(u16, u16x8, __m128i);
-    vector8!(u32, u32x8, __m256i);
+    vector8!(u16, u16x8);
+    vector8!(u32, u32x8);
 
-    vector4!(u32, u32x4, __m128i);
-    vector4!(u64, u64x4, __m256i);
+    vector4!(u32, u32x4);
+    vector4!(u64, u64x4);
 
-    vector2!(u64, u64x2, __m128i);
-    vector2!(u128, u128x2, __m256i);
-
-    pub fn from_u128(x: u128) -> __m128i {
-        union U {
-            intel: __m128i,
-            u128: u128,
-        }
-        unsafe { U { u128: x }.intel }
-    }
-
-    pub fn to_u128(x: __m128i) -> u128 {
-        union U {
-            intel: __m128i,
-            u128: u128,
-        }
-        unsafe { U { intel: x }.u128 }
-    }
+    vector2!(u64, u64x2);
+    vector2!(u128, u128x2);
 
 
     // lift a binary operation over vector and scalar
@@ -1540,143 +1400,3 @@ pub unsafe fn _mm_srli_si128(a: u128, imm8: i32) -> u128 {
     a >> (8 * imm8)
 }
 
-// For every vector operation, there is a choice of saying that
-// it returns a type like __m128i (Intel's name) or of
-// giving a more informative/structured type like u32x4 indicating that
-// it returns 4 32-bit values.
-//
-// For LLVM purposes, we _must_ use the structured types.
-// For Miri purposes, we probably need to use the Intel types.
-//
-// This module provides the same set of intrinsics as above but
-// uses the Intel types instead of the structured types.
-// They are all implemented with a simple wrapper that converts
-// argument types, calls the LLVM version and converts result types.
-mod for_miri {
-    pub use super::vector::{__m128i, __m256i};
-
-    pub unsafe fn llvm_x86_sse2_pcmpeqb_epi8(a: __m128i, b: __m128i) -> __m128i {
-        super::llvm_x86_sse2_pcmpeqb_epi8(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn llvm_x86_sse2_pcmpeqw_epi16(a: __m128i, b: __m128i) -> __m128i {
-        super::llvm_x86_sse2_pcmpeqw_epi16(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn llvm_x86_sse2_psrli_b(a: __m128i, imm8: i32) -> __m128i {
-        super::llvm_x86_sse2_psrli_b(a.into(), imm8).into()
-    }
-
-    pub unsafe fn llvm_x86_sse2_psrli_w(a: __m128i, imm8: i32) -> __m128i {
-        super::llvm_x86_sse2_psrli_w(a.into(), imm8).into()
-    }
-
-    pub unsafe fn llvm_x86_sse2_psrli_d(a: __m128i, imm8: i32) -> __m128i {
-        super::llvm_x86_sse2_psrli_d(a.into(), imm8).into()
-    }
-
-    pub unsafe fn llvm_x86_sse2_psrli_q(a: __m128i, imm8: i32) -> __m128i {
-        super::llvm_x86_sse2_psrli_q(a.into(), imm8).into()
-    }
-
-    pub unsafe fn llvm_x86_avx2_psrli_b(a: __m256i, imm8: i32) -> __m256i {
-        super::llvm_x86_avx2_psrli_b(a.into(), imm8).into()
-    }
-
-    pub unsafe fn llvm_x86_avx2_psrli_w(a: __m256i, imm8: i32) -> __m256i {
-        super::llvm_x86_avx2_psrli_w(a.into(), imm8).into()
-    }
-
-    pub unsafe fn llvm_x86_avx2_psrli_d(a: __m256i, imm8: i32) -> __m256i {
-        super::llvm_x86_avx2_psrli_d(a.into(), imm8).into()
-    }
-
-    pub unsafe fn llvm_x86_avx2_psrli_q(a: __m256i, imm8: i32) -> __m256i {
-        super::llvm_x86_avx2_psrli_q(a.into(), imm8).into()
-    }
-
-    pub unsafe fn llvm_x86_sse2_pmovmskb_128(a: __m128i) -> i32 {
-        super::llvm_x86_sse2_pmovmskb_128(a.into()).into()
-    }
-
-    pub unsafe fn _mm_and_si128(a: __m128i, b: __m128i) -> __m128i {
-        super::_mm_and_si128(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm256_and_si256(a: __m256i, b: __m256i) -> __m256i {
-        super::_mm256_and_si256(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm_andnot_si128(a: __m128i, b: __m128i) -> __m128i {
-        super::_mm_andnot_si128(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm256_andnot_si256(a: __m256i, b: __m256i) -> __m256i {
-        super::_mm256_andnot_si256(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm_or_si128(a: __m128i, b: __m128i) -> __m128i {
-        super::_mm_or_si128(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm256_or_si256(a: __m256i, b: __m256i) -> __m256i {
-        super::_mm256_or_si256(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm_xor_si128(a: __m128i, b: __m128i) -> __m128i {
-        super::_mm_xor_si128(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm256_xor_si256(a: __m256i, b: __m256i) -> __m256i {
-        super::_mm256_xor_si256(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm_set1_epi8(a: i8) -> __m128i {
-        super::_mm_set1_epi8(a.into()).into()
-    }
-
-    pub unsafe fn _mm256_set1_epi8(a: i8) -> __m256i {
-        super::_mm256_set1_epi8(a.into()).into()
-    }
-
-    pub unsafe fn _mm_setzero_epi8() -> __m128i {
-        super::_mm_set1_epi8(0).into()
-    }
-
-    pub unsafe fn _mm256_setzero_epi8() -> __m256i {
-        super::_mm256_set1_epi8(0).into()
-    }
-
-    pub unsafe fn llvm_x86_ssse3_pshuf_b_128(a: __m128i, b: __m128i) -> __m128i {
-        super::llvm_x86_ssse3_pshuf_b_128(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn llvm_x86_avx2_pshuf_b(a: __m256i, b: __m256i) -> __m256i {
-        super::llvm_x86_avx2_pshuf_b(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn llvm_x86_ssse3_pshuf_w_128(a: __m128i, b: __m128i) -> __m128i {
-        super::llvm_x86_ssse3_pshuf_w_128(a.into(), b.into()).into()
-    }
-
-    pub unsafe fn _mm_loadu_si128(mem_addr: *const __m128i) -> __m128i {
-        super::_mm_loadu_si128(mem_addr as *const super::u8x16).into()
-    }
-
-    pub unsafe fn _mm256_loadu_si256(mem_addr: *const __m256i) -> __m256i {
-        super::_mm256_loadu_si256(mem_addr as *const super::u8x32).into()
-    }
-
-    pub unsafe fn _mm_storeu_si128(mem_addr: *mut __m128i, a: __m128i) {
-        super::_mm_storeu_si128(mem_addr as *mut super::u8x16, a.into()).into()
-    }
-
-    pub unsafe fn _mm_storeu_si256(mem_addr: *mut __m256i, a: __m256i) {
-        super::_mm_storeu_si256(mem_addr as *mut super::u8x32, a.into()).into()
-    }
-
-    pub unsafe fn _mm_cvtsi128_si32(a: __m128i) -> i32 {
-        super::_mm_cvtsi128_si32(a.into()).into()
-    }
-
-}
