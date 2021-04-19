@@ -1,5 +1,5 @@
 [package]
-name = "simd_intrinsics"
+name = "simd_emulation"
 version = "0.1.0"
 authors = ["Alastair Reid <adreid@google.com>"]
 edition = "2018"

@@ -7,7 +7,7 @@
 # except according to those terms.
 
 # this rule comes first to make sure that it is the default target
-default: simd_intrinsics.bc
+default: simd_emulation.bc
 
 RUSTC = rustc
 RSFLAGS = --emit=llvm-bc --crate-type=lib -O -Ctarget-feature=+sse2
@@ -24,11 +24,11 @@ build/%.bc: src/%.rs
 	mkdir -p build
 	$(RUSTC) $(RSFLAGS) $^ -o $@
 
-simd_intrinsics.bc: $(OBJS)
+simd_emulation.bc: $(OBJS)
 	$(LINK) $(OBJS) -o $@
 
 clean::
 	$(RM) $(OBJS)
-	$(RM) simd_intrinsics.bc
+	$(RM) simd_emulation.bc
 
 # End of Makefile
