@@ -78,8 +78,8 @@ verifier-seahorn = ["propverify/verifier-seahorn"]
 
 We need to build two *.bc files that will be linked since this is our first time using the docker container.
 ```bash
-pushd /home/rust-verification-tools/runtime/; make; popd
-pushd /home/rust-verification-tools/simd_emulation/; make; popd
+pushd /home/rust-verification-tools/runtime && make && popd
+pushd /home/rust-verification-tools/simd_emulation && make && popd
 ```
 
 Note that these mention the [PropTest]
